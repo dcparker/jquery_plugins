@@ -2,5 +2,5 @@ h1. jQuery: QuickSelect
 
 The QuickSelect plugin allows you to create a text input with a list of specified options, and as you type, those options show up in a list below the input box. You can choose to have it auto-fill the top result into the input box as you type, or select an option using the arrow keys.
 There are two special powers of this plugin:
-1. QuickSilver selection mode: As you type, it will use quicksilver ranking mode, and the top result will automatically be selected when you exit the field.
-2. Select/Options transformation: If you run .quickselect() on a select element, the data from the options will be stored and the select will be turned into an input box of the same id and className(s), and a hidden input of the same name. That way, instead of using a select, the user can simply type what they want and choose from the list. Just render your HTML page with a select and options, and run this plugin to turn it into a quickselect.
+# QuickSilver selection mode: As you type, it will use quicksilver ranking mode, and the top result will automatically be selected when you exit the field.
+# Select/Options transformation: If you run .quickselect() on a select element, the data from the options will be stored and the select will be turned into an input box of the same id and className(s), and a hidden input of the same name. That way, instead of using a select, the user can simply type what they want and choose from the list. Just render your HTML page with a select and options, and run this plugin to turn it into a quickselect.
