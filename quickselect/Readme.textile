@@ -13,3 +13,7 @@ h4. Installation
 #* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
 #* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
+
+h4. Credit
+
+Thank you to "Sabretech":http://www.sabretechllc.com/ for commissioning this project!
