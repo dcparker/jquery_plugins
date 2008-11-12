@@ -77,7 +77,6 @@
 	<p>
 		City Select, translated:
 		<select name="city_select" id="city_select">
-      <option value='' selected="selected"></option>
       <option value='1'>Aberdeen</option>
       <option value='2'>Ada</option>
       <option value='3'>Adamsville</option>
@@ -189,9 +188,6 @@ $(document).ready(function() {
 		delay:10,
 		minChars:1,
 		match:'quicksilver',
-		onItemSelect:selectItem,
-		onFindValue:findValue,
-		// formatItem:formatItem,
 		maxItemsToShow:12
 	});
 
@@ -405,7 +401,7 @@ $(document).ready(function() {
 			match:'quicksilver',
 			onItemSelect:selectItem,
 			onFindValue:findValue,
-			autoFill:false,
+			autoFill:true,
 			maxItemsToShow:10
 		}
 	);
