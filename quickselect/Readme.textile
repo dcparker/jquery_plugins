@@ -10,6 +10,6 @@ h4. Installation
 
 # Include the jquery library in your project.
 # Then you'll need the following files for this plugin:
-	* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
-	* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
-	* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
+#* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
+#* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
+#* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
