@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>jQuery Autocomplete</title>
+	<script type="text/javascript" src="jquery-1.2.6.pack.js"></script>
+	<script type='text/javascript' src='quicksilver.js'></script>
+	<script type='text/javascript' src='jquery.quickselect.js'></script>
+	<link rel="stylesheet" type="text/css" href="jquery.autocomplete.css" />
+</head>
+
+<body>
+
+<h1>
+	jQuery Autocomplete Mod
+</h1>
+
+<p>
+	This is modification of <a href="http://www.dyve.net/jquery/?autocomplete">Dylan Verheul's jQuery Autcomplete plug-in</a>.
+	I customized his library adding the features I needed and fixing issues
+	I considered bugs.
+</p>
+
+<h2>
+	Enhancements
+</h2>
+<ul>
+	<li>
+		Supports local data array (can now use w/out AJAX).
+	</li>
+	<li>
+		Limit dropdown to XX number of results (good for limiting
+		the results to users)
+	</li>
+	<li>
+		Autofill pre-populates text box as you type
+	</li>
+	<li>
+		New findValue() method can be used to programmatically
+		determine if the value in the box is a valid option.
+		(Useful for verifying the text entered is an existing
+		value option.)
+	</li>
+	<li>
+		Dropdown options now correctly re-position themselves on
+		each display (which means they adjust for changing to the
+		DOM)
+	</li>
+	<li>
+		Dropdown box defaults to the width of the input field its
+		attached to (you can manually specify a larger width as well)
+	</li>
+	<li>
+		Better emulates Windows autocomplete boxes (for example: hitting delete
+		and retyping the same box will now bring back the dropdown
+		menu)
+	</li>
+	<li>
+		Miscellaneous bug fixes
+	</li>
+</ul>
+
+<form action="" onsubmit="return false;">
+
+	<p>
+		Local City Autocomplete:
+		<input type="text" id="CityLocal" value="" />
+		<input type="button" value="Get Value" onclick="lookupLocal();" />
+		(Shows a max of 10 entries)
+	</p>
+
+	<p>
+		Ajax City Autocomplete:
+		<input type="text" id="CityAjax" value="" style="width: 200px;" />
+		<input type="button" value="Get Value" onclick="lookupAjax();" />
+	</p>
+
+	<p>
+		City Select, translated:
+		<select name="city_select" id="city_select">
+      <option value='' selected="selected"></option>
+      <option value='1'>Aberdeen</option>
+      <option value='2'>Ada</option>
+      <option value='3'>Adamsville</option>
+      <option value='4'>Addyston</option>
+      <option value='5'>Adelphi</option>
+      <option value='6'>Adena</option>
+      <option value='7'>Adrian</option>
+      <option value='8'>Akron</option>
+      <option value='9'>Albany</option>
+      <option value='10'>Alexandria</option>
+      <option value='11'>Alger</option>
+      <option value='12'>Alledonia</option>
+      <option value='13'>Alliance</option>
+      <option value='14'>Alpha</option>
+      <option value='15'>Alvada</option>
+      <option value='16'>Alvordton</option>
+      <option value='17'>Amanda</option>
+      <option value='18'>Amelia</option>
+      <option value='19'>Amesville</option>
+      <option value='20'>Amherst</option>
+      <option value='21'>Amlin</option>
+      <option value='22'>Amsden</option>
+      <option value='23'>Amsterdam</option>
+      <option value='24'>Andover</option>
+      <option value='25'>Anna</option>
+      <option value='26'>Ansonia</option>
+      <option value='27'>Antwerp</option>
+      <option value='28'>Apple Creek</option>
+      <option value='29'>Arcadia</option>
+      <option value='30'>Arcanum</option>
+      <option value='31'>Archbold</option>
+      <option value='32'>Arlington</option>
+      <option value='33'>Ashland</option>
+      <option value='34'>Ashley</option>
+      <option value='35'>Ashtabula</option>
+      <option value='36'>Ashville</option>
+      <option value='37'>Athens</option>
+      <option value='38'>Attica</option>
+      <option value='39'>Atwater</option>
+      <option value='40'>Augusta</option>
+      <option value='41'>Aurora</option>
+      <option value='42'>Austinburg</option>
+      <option value='43'>Ava</option>
+      <option value='44'>Avon</option>
+		</select>
+	</p>
+
+	<p>
+		Some dropdown 2:
+		<select name="Test2" id="idTest2">
+			<option value="1">Item 1</option>
+			<option value="2">Item 2</option>
+			<option value="3">Item 3</option>
+			<option value="4">Item 4</option>
+		</select>
+	</p>
+
+	<p>
+		Some dropdown 3:
+		<select name="Test3" id="idTest3">
+			<option value="1">Item 1</option>
+			<option value="2">Item 2</option>
+			<option value="3">Item 3</option>
+			<option value="4">Item 4</option>
+		</select>
+	</p>
+
+</form>
+
+<script type="text/javascript">
+function findValue(li) {
+	if( li == null ) return alert("No match!");
+
+	// if coming from an AJAX call, let's use the CityId as the value
+	if( !!li.extra ) var sValue = li.extra[0];
+
+	// otherwise, let's just display the value in the text box
+	else var sValue = li.selectValue;
+
+	alert("The value you selected was: " + sValue);
+}
+
+function selectItem(li) {
+	findValue(li);
+}
+
+function formatItem(row) {
+	return row[0] + " (id: " + row[1] + ")";
+}
+
+function lookupAjax(){
+	var oSuggest = $("#CityAjax")[0].quickselecter;
+
+	oSuggest.findValue();
+
+	return false;
+}
+
+function lookupLocal(){
+	var oSuggest = $("#CityLocal")[0].quickselecter;
+
+	oSuggest.findValue();
+
+	return false;
+}
+
+$(document).ready(function() {
+	$("#city_select").quickselect({
+		delay:10,
+		minChars:1,
+		match:'quicksilver',
+		onItemSelect:selectItem,
+		onFindValue:findValue,
+		// formatItem:formatItem,
+		maxItemsToShow:12
+	});
+
+	$("#CityLocal").quickselectArray(
+		[
+			"Aberdeen", "Ada", "Adamsville", "Addyston", "Adelphi", "Adena", "Adrian", "Akron",
+			"Albany", "Alexandria", "Alger", "Alledonia", "Alliance", "Alpha", "Alvada",
+			"Alvordton", "Amanda", "Amelia", "Amesville", "Amherst", "Amlin", "Amsden",
+			"Amsterdam", "Andover", "Anna", "Ansonia", "Antwerp", "Apple Creek", "Arcadia",
+			"Arcanum", "Archbold", "Arlington", "Ashland", "Ashley", "Ashtabula", "Ashville",
+			"Athens", "Attica", "Atwater", "Augusta", "Aurora", "Austinburg", "Ava", "Avon",
+			"Avon Lake", "Bainbridge", "Bakersville", "Baltic", "Baltimore", "Bannock",
+			"Barberton", "Barlow", "Barnesville", "Bartlett", "Barton", "Bascom", "Batavia",
+			"Bath", "Bay Village", "Beach City", "Beachwood", "Beallsville", "Beaver",
+			"Beaverdam", "Bedford", "Bellaire", "Bellbrook", "Belle Center", "Belle Valley",
+			"Bellefontaine", "Bellevue", "Bellville", "Belmont", "Belmore", "Beloit", "Belpre",
+			"Benton Ridge", "Bentonville", "Berea", "Bergholz", "Berkey", "Berlin",
+			"Berlin Center", "Berlin Heights", "Bethel", "Bethesda", "Bettsville", "Beverly",
+			"Bidwell", "Big Prairie", "Birmingham", "Blacklick", "Bladensburg", "Blaine",
+			"Blakeslee", "Blanchester", "Blissfield", "Bloomdale", "Bloomingburg",
+			"Bloomingdale", "Bloomville", "Blue Creek", "Blue Rock", "Bluffton",
+			"Bolivar", "Botkins", "Bourneville", "Bowerston", "Bowersville",
+			"Bowling Green", "Bradford", "Bradner", "Brady Lake", "Brecksville",
+			"Bremen", "Brewster", "Brice", "Bridgeport", "Brilliant", "Brinkhaven",
+			"Bristolville", "Broadview Heights", "Broadway", "Brookfield", "Brookpark",
+			"Brookville", "Brownsville", "Brunswick", "Bryan", "Buchtel", "Buckeye Lake",
+			"Buckland", "Bucyrus", "Buffalo", "Buford", "Burbank", "Burghill", "Burgoon",
+			"Burkettsville", "Burton", "Butler", "Byesville", "Cable", "Cadiz", "Cairo",
+			"Caldwell", "Caledonia", "Cambridge", "Camden", "Cameron", "Camp Dennison",
+			"Campbell", "Canal Fulton", "Canal Winchester", "Canfield", "Canton", "Carbon Hill",
+			"Carbondale", "Cardington", "Carey", "Carroll", "Carrollton", "Casstown",
+			"Castalia", "Catawba", "Cecil", "Cedarville", "Celina", "Centerburg",
+			"Chagrin Falls", "Chandlersville", "Chardon", "Charm", "Chatfield", "Chauncey",
+			"Cherry Fork", "Chesapeake", "Cheshire", "Chester", "Chesterhill", "Chesterland",
+			"Chesterville", "Chickasaw", "Chillicothe", "Chilo", "Chippewa Lake",
+			"Christiansburg", "Cincinnati", "Circleville", "Clarington", "Clarksburg",
+			"Clarksville", "Clay Center", "Clayton", "Cleveland", "Cleves", "Clifton",
+			"Clinton", "Cloverdale", "Clyde", "Coal Run", "Coalton", "Coldwater", "Colerain",
+			"College Corner", "Collins", "Collinsville", "Colton", "Columbia Station",
+			"Columbiana", "Columbus", "Columbus Grove", "Commercial Point", "Conesville",
+			"Conneaut", "Conover", "Continental", "Convoy", "Coolville", "Corning", "Cortland",
+			"Coshocton", "Covington", "Creola", "Crestline", "Creston", "Crooksville",
+			"Croton", "Crown City", "Cuba", "Cumberland", "Curtice", "Custar", "Cutler",
+			"Cuyahoga Falls", "Cygnet", "Cynthiana", "Dalton", "Damascus", "Danville",
+			"Dayton", "De Graff", "Decatur", "Deerfield", "Deersville", "Defiance",
+			"Delaware", "Dellroy", "Delphos", "Delta", "Dennison", "Derby", "Derwent",
+			"Deshler", "Dexter City", "Diamond", "Dillonvale", "Dola", "Donnelsville",
+			"Dorset", "Dover", "Doylestown", "Dresden", "Dublin", "Dunbridge", "Duncan Falls",
+			"Dundee", "Dunkirk", "Dupont", "East Claridon", "East Fultonham",
+			"East Liberty", "East Liverpool", "East Palestine", "East Rochester",
+			"East Sparta", "East Springfield", "Eastlake", "Eaton", "Edgerton", "Edison",
+			"Edon", "Eldorado", "Elgin", "Elkton", "Ellsworth", "Elmore", "Elyria",
+			"Empire", "Englewood", "Enon", "Etna", "Euclid", "Evansport", "Fairborn",
+			"Fairfield", "Fairpoint", "Fairview", "Farmdale", "Farmer", "Farmersville",
+			"Fayette", "Fayetteville", "Feesburg", "Felicity", "Findlay", "Flat Rock",
+			"Fleming", "Fletcher", "Flushing", "Forest", "Fort Jennings", "Fort Loramie",
+			"Fort Recovery", "Fostoria", "Fowler", "Frankfort", "Franklin",
+			"Franklin Furnace", "Frazeysburg", "Fredericksburg", "Fredericktown",
+			"Freeport", "Fremont", "Fresno", "Friendship", "Fulton", "Fultonham",
+			"Galena", "Galion", "Gallipolis", "Galloway", "Gambier", "Garrettsville",
+			"Gates Mills", "Geneva", "Genoa", "Georgetown", "Germantown", "Gettysburg",
+			"Gibsonburg", "Girard", "Glandorf", "Glencoe", "Glenford", "Glenmont",
+			"Glouster", "Gnadenhutten", "Gomer", "Goshen", "Grafton", "Grand Rapids",
+			"Grand River", "Granville", "Gratiot", "Gratis", "Graysville", "Graytown",
+			"Green", "Green Camp", "Green Springs", "Greenfield", "Greenford",
+			"Greentown", "Greenville", "Greenwich", "Grelton", "Grove City",
+			"Groveport", "Grover Hill", "Guysville", "Gypsum", "Hallsville",
+			"Hamden", "Hamersville", "Hamilton", "Hamler", "Hammondsville",
+			"Hannibal", "Hanoverton", "Harbor View", "Harlem Springs", "Harpster",
+			"Harrisburg", "Harrison", "Harrisville", "Harrod", "Hartford", "Hartville",
+			"Harveysburg", "Haskins", "Haverhill", "Haviland", "Haydenville", "Hayesville",
+			"Heath", "Hebron", "Helena", "Hicksville", "Higginsport", "Highland", "Hilliard",
+			"Hillsboro", "Hinckley", "Hiram", "Hockingport", "Holgate", "Holland",
+			"Hollansburg", "Holloway", "Holmesville", "Homer", "Homerville", "Homeworth",
+			"Hooven", "Hopedale", "Hopewell", "Houston", "Howard", "Hoytville", "Hubbard",
+			"Hudson", "Huntsburg", "Huntsville", "Huron", "Iberia", "Independence",
+			"Irondale", "Ironton", "Irwin", "Isle Saint George", "Jackson", "Jackson Center",
+			"Jacksontown", "Jacksonville", "Jacobsburg", "Jamestown", "Jasper",
+			"Jefferson", "Jeffersonville", "Jenera", "Jeromesville", "Jerry City",
+			"Jerusalem", "Jewell", "Jewett", "Johnstown", "Junction City", "Kalida",
+			"Kansas", "Keene", "Kelleys Island", "Kensington", "Kent", "Kenton",
+			"Kerr", "Kettlersville", "Kidron", "Kilbourne", "Killbuck", "Kimbolton",
+			"Kings Mills", "Kingston", "Kingsville", "Kinsman", "Kipling", "Kipton",
+			"Kirby", "Kirkersville", "Kitts Hill", "Kunkle", "La Rue", "Lacarne",
+			"Lafayette", "Lafferty", "Lagrange", "Laings", "Lake Milton", "Lakemore",
+			"Lakeside Marblehead", "Lakeview", "Lakeville", "Lakewood", "Lancaster",
+			"Langsville", "Lansing", "Latham", "Latty", "Laura", "Laurelville",
+			"Leavittsburg", "Lebanon", "Lees Creek", "Leesburg", "Leesville",
+			"Leetonia", "Leipsic", "Lemoyne", "Lewis Center", "Lewisburg",
+			"Lewistown", "Lewisville", "Liberty Center", "Lima", "Limaville",
+			"Lindsey", "Lisbon", "Litchfield", "Lithopolis", "Little Hocking",
+			"Lockbourne", "Lodi", "Logan", "London", "Londonderry",
+			"Long Bottom", "Lorain", "Lore City", "Loudonville", "Louisville",
+			"Loveland", "Lowell", "Lowellville", "Lower Salem", "Lucas",
+			"Lucasville", "Luckey", "Ludlow Falls", "Lynchburg", "Lynx",
+			"Lyons", "Macedonia", "Macksburg", "Madison", "Magnetic Springs",
+			"Magnolia", "Maineville", "Malaga", "Malinta", "Malta", "Malvern",
+			"Manchester", "Mansfield", "Mantua", "Maple Heights", "Maplewood",
+			"Marathon", "Marengo", "Maria Stein", "Marietta", "Marion",
+			"Mark Center", "Marshallville", "Martel", "Martin", "Martins Ferry",
+			"Martinsburg", "Martinsville", "Marysville", "Mason", "Massillon",
+			"Masury", "Maumee", "Maximo", "Maynard", "Mc Arthur", "Mc Clure",
+			"Mc Comb", "Mc Connelsville", "Mc Cutchenville", "Mc Dermott",
+			"Mc Donald", "Mc Guffey", "Mechanicsburg", "Mechanicstown",
+			"Medina", "Medway", "Melmore", "Melrose", "Mendon", "Mentor",
+			"Mesopotamia", "Metamora", "Miamisburg", "Miamitown", "Miamiville",
+			"Middle Bass", "Middle Point", "Middlebranch", "Middleburg",
+			"Middlefield", "Middleport", "Middletown", "Midland", "Midvale",
+			"Milan", "Milford", "Milford Center", "Millbury", "Milledgeville",
+			"Miller City", "Millersburg", "Millersport", "Millfield",
+			"Milton Center", "Mineral City", "Mineral Ridge", "Minerva",
+			"Minford", "Mingo", "Mingo Junction", "Minster", "Mogadore",
+			"Monclova", "Monroe", "Monroeville", "Montezuma", "Montpelier",
+			"Montville", "Morral", "Morristown", "Morrow", "Moscow",
+			"Mount Blanchard", "Mount Cory", "Mount Eaton", "Mount Gilead",
+			"Mount Hope", "Mount Liberty", "Mount Orab", "Mount Perry",
+			"Mount Pleasant", "Mount Saint Joseph", "Mount Sterling",
+			"Mount Vernon", "Mount Victory", "Mowrystown", "Moxahala",
+			"Munroe Falls", "Murray City", "Nankin", "Napoleon", "Nashport",
+			"Nashville", "Navarre", "Neapolis", "Neffs", "Negley",
+			"Nelsonville", "Nevada", "Neville", "New Albany", "New Athens",
+			"New Bavaria", "New Bloomington", "New Bremen", "New Carlisle",
+			"New Concord", "New Hampshire", "New Haven", "New Holland",
+			"New Knoxville", "New Lebanon", "New Lexington", "New London",
+			"New Madison", "New Marshfield", "New Matamoras", "New Middletown",
+			"New Paris", "New Philadelphia", "New Plymouth", "New Richmond",
+			"New Riegel", "New Rumley", "New Springfield", "New Straitsville",
+			"New Vienna", "New Washington", "New Waterford", "New Weston",
+			"Newark", "Newbury", "Newcomerstown", "Newport", "Newton Falls",
+			"Newtonsville", "Ney", "Niles", "North Baltimore", "North Bend",
+			"North Benton", "North Bloomfield", "North Fairfield",
+			"North Georgetown", "North Hampton", "North Jackson",
+			"North Kingsville", "North Lawrence", "North Lewisburg",
+			"North Lima", "North Olmsted", "North Ridgeville", "North Robinson",
+			"North Royalton", "North Star", "Northfield", "Northwood", "Norwalk",
+			"Norwich", "Nova", "Novelty", "Oak Harbor", "Oak Hill", "Oakwood",
+			"Oberlin", "Oceola", "Ohio City", "Okeana", "Okolona", "Old Fort",
+			"Old Washington", "Olmsted Falls", "Ontario", "Orangeville",
+			"Oregon", "Oregonia", "Orient", "Orrville", "Orwell", "Osgood",
+			"Ostrander", "Ottawa", "Ottoville", "Otway", "Overpeck",
+			"Owensville", "Oxford", "Painesville", "Palestine", "Pandora",
+			"Paris", "Parkman", "Pataskala", "Patriot", "Paulding", "Payne",
+			"Pedro", "Peebles", "Pemberton", "Pemberville", "Peninsula",
+			"Perry", "Perrysburg", "Perrysville", "Petersburg", "Pettisville",
+			"Phillipsburg", "Philo", "Pickerington", "Piedmont", "Pierpont",
+			"Piketon", "Piney Fork", "Pioneer", "Piqua", "Pitsburg",
+			"Plain City", "Plainfield", "Pleasant City", "Pleasant Hill",
+			"Pleasant Plain", "Pleasantville", "Plymouth", "Polk",
+			"Pomeroy", "Port Clinton", "Port Jefferson", "Port Washington",
+			"Port William", "Portage", "Portland", "Portsmouth", "Potsdam",
+			"Powell", "Powhatan Point", "Proctorville", "Prospect", "Put in Bay",
+			"Quaker City", "Quincy", "Racine", "Radnor", "Randolph", "Rarden",
+			"Ravenna", "Rawson", "Ray", "Rayland", "Raymond", "Reedsville",
+			"Reesville", "Reno", "Republic", "Reynoldsburg", "Richfield",
+			"Richmond", "Richmond Dale", "Richwood", "Ridgeville Corners",
+			"Ridgeway", "Rio Grande", "Ripley", "Risingsun", "Rittman",
+			"Robertsville", "Rock Camp", "Rock Creek", "Rockbridge", "Rockford",
+			"Rocky Ridge", "Rocky River", "Rogers", "Rome", "Rootstown", "Roseville",
+			"Rosewood", "Ross", "Rossburg", "Rossford", "Roundhead", "Rudolph",
+			"Rushsylvania", "Rushville", "Russells Point", "Russellville", "Russia",
+			"Rutland", "Sabina", "Saint Clairsville", "Saint Henry", "Saint Johns",
+			"Saint Louisville", "Saint Marys", "Saint Paris", "Salem", "Salesville",
+			"Salineville", "Sandusky", "Sandyville", "Sarahsville", "Sardinia",
+			"Sardis", "Savannah", "Scio", "Scioto Furnace", "Scott", "Scottown",
+			"Seaman", "Sebring", "Sedalia", "Senecaville", "Seven Mile", "Seville",
+			"Shade", "Shadyside", "Shandon", "Sharon Center", "Sharpsburg",
+			"Shauck", "Shawnee", "Sheffield Lake", "Shelby", "Sherrodsville",
+			"Sherwood", "Shiloh", "Short Creek", "Shreve", "Sidney", "Sinking Spring",
+			"Smithfield", "Smithville", "Solon", "Somerdale", "Somerset",
+			"Somerville", "South Bloomingville", "South Charleston", "South Lebanon",
+			"South Point", "South Salem", "South Solon", "South Vienna",
+			"South Webster", "Southington", "Sparta", "Spencer", "Spencerville",
+			"Spring Valley", "Springboro", "Springfield", "Stafford", "Sterling",
+			"Steubenville", "Stewart", "Stillwater", "Stockdale", "Stockport",
+			"Stone Creek", "Stony Ridge", "Stout", "Stoutsville", "Stow", "Strasburg",
+			"Stratton", "Streetsboro", "Strongsville", "Struthers", "Stryker",
+			"Sugar Grove", "Sugarcreek", "Sullivan", "Sulphur Springs", "Summerfield",
+			"Summit Station", "Summitville", "Sunbury", "Swanton", "Sycamore",
+			"Sycamore Valley", "Sylvania", "Syracuse", "Tallmadge", "Tarlton",
+			"Terrace Park", "The Plains", "Thompson", "Thornville", "Thurman",
+			"Thurston", "Tiffin", "Tiltonsville", "Tipp City", "Tippecanoe", "Tiro",
+			"Toledo", "Tontogany", "Torch", "Toronto", "Tremont City", "Trenton",
+			"Trimble", "Trinway", "Troy", "Tuppers Plains", "Tuscarawas", "Twinsburg",
+			"Uhrichsville", "Union City", "Union Furnace", "Unionport", "Uniontown",
+			"Unionville", "Unionville Center", "Uniopolis", "Upper Sandusky", "Urbana",
+			"Utica", "Valley City", "Van Buren", "Van Wert", "Vandalia", "Vanlue",
+			"Vaughnsville", "Venedocia", "Vermilion", "Verona", "Versailles",
+			"Vickery", "Vienna", "Vincent", "Vinton", "Wadsworth", "Wakefield",
+			"Wakeman", "Walbridge", "Waldo", "Walhonding", "Walnut Creek", "Wapakoneta",
+			"Warnock", "Warren", "Warsaw", "Washington Court House",
+			"Washingtonville", "Waterford", "Waterloo", "Watertown", "Waterville",
+			"Wauseon", "Waverly", "Wayland", "Wayne", "Waynesburg", "Waynesfield",
+			"Waynesville", "Wellington", "Wellston", "Wellsville", "West Alexandria",
+			"West Chester", "West Elkton", "West Farmington", "West Jefferson",
+			"West Lafayette", "West Liberty", "West Manchester", "West Mansfield",
+			"West Millgrove", "West Milton", "West Point", "West Portsmouth",
+			"West Rushville", "West Salem", "West Union", "West Unity", "Westerville",
+			"Westfield Center", "Westlake", "Weston", "Westville", "Wharton",
+			"Wheelersburg", "Whipple", "White Cottage", "Whitehouse", "Wickliffe",
+			"Wilberforce", "Wilkesville", "Willard", "Williamsburg", "Williamsfield",
+			"Williamsport", "Williamstown", "Williston", "Willoughby", "Willow Wood",
+			"Willshire", "Wilmington", "Wilmot", "Winchester", "Windham", "Windsor",
+			"Winesburg", "Wingett Run", "Winona", "Wolf Run", "Woodsfield",
+			"Woodstock", "Woodville", "Wooster", "Wren", "Xenia", "Yellow Springs",
+			"Yorkshire", "Yorkville", "Youngstown", "Zaleski", "Zanesfield", "Zanesville",
+			"Zoar"
+		],
+		{
+			delay:10,
+			minChars:1,
+			match:'quicksilver',
+			onItemSelect:selectItem,
+			onFindValue:findValue,
+			autoFill:false,
+			maxItemsToShow:10
+		}
+	);
+});
+</script>
+
+<blockquote>
+	<h3>
+		Note
+	</h3>
+
+	<p>
+		There have been several reports of the contents of the iFrame being
+		placed into the text box when the [TAB] key is pressed. This is due
+		to a bug in jQuery v1.1.1 and not w/this code. See the following
+		thread on the jQuery Mailing List for more information:
+		<a href="http://www.nabble.com/Bug-in-$()-in-jQuery-v1.1.1--t3144910.html#nabble.i8718421">http://www.nabble.com/Bug-in-$()-in-jQuery-v1.1.1--t3144910.html#nabble.i8718421</a>.
+	</p>
+	<p>
+		This bug is fixed in jQuery v1.2.1.
+	</p>
+</blockquote>
+
+<h2>
+	Download
+</h2>
+
+<p>
+	<a href="jquery.quickselect.js">jquery.quickselect.js</a>
+	<br />
+	<a href="jquery.autocomplete.css">jquery.autocomplete.css</a>
+</p>
+
+
+
+</body>
+</html>
