@@ -1,508 +1,456 @@
 (function($){
-  $.quickselect = function(input, options){
-  	// Create a link to self
-  	var me = this;
-
-  	// Create jQuery object for input element
-  	var $input = $(input).attr("quickselect", "off");
-
-  	// Apply inputClass if necessary
-  	if(options.inputClass) $input.addClass(options.inputClass);
-
-  	// Create results
-  	var results = document.createElement("div");
-  	// Create jQuery object for results
-  	var $results = $(results);
-  	$results.hide().addClass(options.resultsClass).css("position", "absolute");
-  	if(options.width > 0) $results.css("width", options.width);
-
-  	// Add to body element
-  	$("body").append(results);
-
-  	input.quickselecter = me;
-
-  	var timeout = null;
-  	var prev = "";
-  	var active = -1;
-  	var cache = {};
-  	var keyb = false;
-  	var hasFocus = false;
-  	var lastKeyPressCode = null;
-
-  	// flush cache
-  	function flushCache(){
-  		cache = {};
-  		cache.data = {};
-  		cache.length = 0;
-  	};
-
-  	// flush cache
-  	flushCache();
-
-  	// if there is a data array supplied
-  	if(options.data != null){
-  		var sFirstChar = "", stMatchSets = {}, row = [];
-
-  		// no url was specified, we need to adjust the cache length to make sure it fits the local data store
-  		if(typeof options.url != "string") options.cacheLength = 1;
-
-  		// loop through the array and create a lookup structure
-  		for( var i=0; i < options.data.length; i++){
-  			// if row is a string, make an array otherwise just reference the array
-  			row = ((typeof options.data[i] == "string") ? [options.data[i]] : options.data[i]);
-
-  			// if the length is zero, don't add to list
-  			if(row[0].length > 0){
-  				// get the first character
-  				sFirstChar = row[0].substring(0, 1).toLowerCase();
-  				// if no lookup array for this character exists, look it up now
-  				if(!stMatchSets[sFirstChar]) stMatchSets[sFirstChar] = [];
-  				// if the match is a string
-  				stMatchSets[sFirstChar].push(row);
-  			}
-  		}
-
-  		// add the data items to the cache
-  		for( var k in stMatchSets){
-  			// increase the cache size
-  			options.cacheLength++;
-  			// add to the cache
-  			addToCache(k, stMatchSets[k]);
-  		}
+  $.fn.indexOf = function(e){
+  	for( var i=0; i<this.length; i++){
+  		if(this[i] == e) return i;
   	}
+  	return -1;
+  };
 
-  	$input
-  	.keydown(function(e){
-  		// track last key pressed
-  		lastKeyPressCode = e.keyCode;
-  		switch(e.keyCode){
-  			case 38: // up
-  				e.preventDefault();
-  				moveSelect(-1);
-  				break;
-  			case 40: // down
-  				e.preventDefault();
-  				moveSelect(1);
-  				break;
-  			case 9:  // tab
-  			case 13: // return
-  				if(selectCurrent()){
-  					// make sure to blur off the current field
-  					$input.get(0).blur();
-  					e.preventDefault();
-  				}
-  				break;
-  			default:
-  				active = 0;
-  				if(timeout) clearTimeout(timeout);
-  				timeout = setTimeout(function(){onChange();}, options.delay);
-  				break;
-  		}
-  	})
-  	.focus(function(){
-  		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
-  		hasFocus = true;
-  	})
-  	.blur(function(){
-  		// track whether the field has focus
-  		hasFocus = false;
-  		hideResults();
-  	});
+  function Populater(mode){
+    this.populate = function(value){
+      var that = this;
+    	if(!this.that.options.matchCase) value = value.toLowerCase();
+    	var data = this.that.options.cacheLength ? this.that.loadFromCache(value) : null;
+      if(data){
+        this.that.populate_list(value, data);
+    	}else{
+        this.get_data(value, function(data){
+          if(data) that.that.populate_list(value, data);
+            else $(that.that.text_input).removeClass(that.that.options.loadingClass);
+        });
+    	}
+    };
+  }
 
-  	hideResultsNow();
+  function AjaxPopulate(that){
+    this.that = that;
+    var ajax = this;
+    this.get_data = function(value, callback){
+      $.getJSON(makeUrl(value), function(data){
+        callback(ajax.importData(value, data));
+      });
+    };
 
-  	function onChange(){
-  		// ignore if the following keys are pressed: [del] [shift] [capslock]
-  		if(lastKeyPressCode == 46 || (lastKeyPressCode > 8 && lastKeyPressCode < 32)) return $results.hide();
-  		var v = $input.val();
-  		if(v == prev)return;
-  		prev = v;
-  		if(v.length >= options.minChars){
-  			$input.addClass(options.loadingClass);
-  			requestData(v);
-  			moveSelect(0);
-  		} else {
-  		  if(options.onBlank) options.onBlank();
-  			$input.removeClass(options.loadingClass);
-  			$results.hide();
-  		}
+    this.importData = function(value, data){
+			this.that.addToCache(value, data);
+			return data;
+    };
+
+    function makeUrl(q){
+    	var url = that.options.url + "?q=" + encodeURI(q);
+    	for (var i in that.options.extraParams){
+    		url += "&" + i + "=" + encodeURI(that.options.extraParams[i]);
+    	}
+    	return url;
+    };
+  }
+  AjaxPopulate.prototype = new Populater('ajax');
+
+  function DataPopulate(that){
+    this.that = that;
+    this.get_data = function(value, callback){
+    	if(!this.that.options.data) callback();
+    	else{
+        var rows = [], row = [];
+
+    	  // create a lookup by first letter.
+    		for(var i=0; i < this.that.options.data.length; i++){
+    			row = ((typeof this.that.options.data[i] == "string") ? [this.that.options.data[i]] : this.that.options.data[i]); // make sure each element is an array
+  				rows.push(row);                        // add row to blank lookup
+    		}
+    		// add the data items to the cache
+        this.that.options.cacheLength++;
+  			this.that.addToCache('', rows);
+
+    		callback(this.that.loadFromCache(value));
+    	};
+    };
+  }
+  DataPopulate.prototype = new Populater('data');
+
+  // The QuickSelect Functions...
+  function QuickSelectPrototype(){
+    this.flushCache = function(){
+  		this.cache = {data:{},length:0};
   	};
+  	this.addToCache = function(q, data){
+  		if(!data || !this.options.cacheLength) return;
+  		if(!this.cache.length || this.cache.length > this.options.cacheLength){
+  			this.flushCache();
+  			this.cache.length++;
+  		} else if(!this.cache[q]){
+  			this.cache.length++;
+  		}
+  		this.cache.data[q] = data;
+  	};
+    this.loadFromCache = function(q){
+    	if(!q) return null;
+    	if(this.cache.data[q]) return this.cache.data[q];
+    	for (var i = q.length - 1; i >= 0; i--){
+    		var qs = q.substr(0, i);
+    		var c = this.cache.data[qs];
+    		if(c){
+    			var csub = [];
+    			for (var j = 0; j < c.length; j++){
+    				var x = c[j];
+    				var x0 = x[0];
+    				if(this.findMatch(this.options.match, x0, q)) csub[csub.length] = x;
+    			}
+    			return csub.sort(sortMatches(this.options.match, q));
+    		}
+    	}
+    	return null;
+    };
 
-   	function moveSelect(step){
-  		var lis = $("li", results);
+    this.findMatch = function(mode, str, sub){
+    	if(!this.options.matchCase) str = str.toLowerCase();
+      switch(mode){
+        case 'substring':
+        	var i = str.indexOf(sub);
+        	if(i == -1) return false;
+        	return i == 0 || this.options.matchContains;
+        case 'quicksilver':
+      	  return str.score(sub) > 0;
+      };
+    };
+
+    function sortMatches(mode, sub){
+      switch(mode){
+        case 'substring':
+          return function(a,b){
+            var c = [a[0],b[0]].sort;
+            return (a[0] == c[0]) - (b[0] == c[1]);
+          };
+        case 'quicksilver':
+          return function(a,b){
+        	  var as = a[0].toLowerCase().score(sub);
+            var bs = b[0].toLowerCase().score(sub);
+            return(as > bs ? -1 : (bs > as ? 1 : 0));
+          };
+      };
+    };
+
+   	this.moveSelect = function(step){
+  		var lis = $("li", this.results);
   		if(!lis)return;
 
-  		active += step;
+  		this.active += step;
 
-  		if(active < 0)active = 0;
-  		  else if(active >= lis.size())
-  		    active = lis.size() - 1;
+  		if(this.active < 0)this.active = 0;
+  		  else if(this.active >= lis.size())
+  		    this.active = lis.size() - 1;
 
-  		lis.removeClass("ac_over");
-  		$(lis[active]).addClass("ac_over");
+  		lis.removeClass(this.options.selectedClass);
+  		$(lis[this.active]).addClass(this.options.selectedClass);
   	};
 
-  	function selectCurrent(){
-  		var li = $("li.ac_over", results)[0];
-  		if(!li){
-  			var $li = $("li", results);
-  			if(options.selectOnly){
-  				if($li.length == 1) li = $li[0];
-  			} else if(options.selectFirst){
-  				li = $li[0];
-  			}
-  		}
+  	this.selectCurrent = function(){
+  		var li = $("li."+this.options.selectedClass, this.results)[0];
   		if(li){
-  			selectItem(li);
+  			this.selectItem(li);
   			return true;
   		} else {
   			return false;
   		}
   	};
 
-  	function selectItem(li){
+  	this.selectItem = function(li){
+      var that = this;
+
   		if(!li){
   			li = document.createElement("li");
-  			li.extra = [];
-  			li.selectValue = "";
+  			li.values = [];
   		}
-  		var v = $.trim(li.selectValue ? li.selectValue : li.innerHTML);
-  		input.lastSelected = v;
-  		prev = v;
-  		$results.html("");
-  		$input.val(v);
-  		hideResultsNow();
-  		if(options.onItemSelect) setTimeout(function(){ options.onItemSelect(li) }, 1);
+      var v = $.trim(li.values[0] || li.innerHTML);
+  		this.text_input.lastSelected = $.trim(li.values[0] || li.innerHTML);
+      // TODO: debug whether this should be the $.trim'd version or not.
+  		this.previous_value = v;
+  		$(this.results).html("");
+  		
+      this.options.update_fields.each(function(i,input){
+        $(input).val(li.values[i]);
+      });
+      this.hideResultsNow();
+  		if(this.options.onItemSelect) setTimeout(function(){ that.options.onItemSelect(li) }, 1);
   	};
 
-  	// selects a portion of the input string
-  	function createSelection(start, end){
-  		// get a reference to the input element
-  		var field = $input.get(0);
-  		if(field.createTextRange){
-  			var selRange = field.createTextRange();
-  			selRange.collapse(true);
-  			selRange.moveStart("character", start);
-  			selRange.moveEnd("character", end);
-  			selRange.select();
-  		} else if(field.setSelectionRange){
-  			field.setSelectionRange(start, end);
-  		} else {
-  			if(field.selectionStart){
-  				field.selectionStart = start;
-  				field.selectionEnd = end;
-  			}
-  		}
-  		field.focus();
-  	};
-
-  	// fills in the input box w/the first match (assumed to be the best match)
-  	function autoFill(sValue){
-  		// if the last user key pressed was backspace, don't autofill
-  		if(lastKeyPressCode != 8){
-  			// fill in the value (keep the case the user has typed)
-  			$input.val($input.val() + sValue.substring(prev.length));
-  			// select the portion of the value not typed by the user (so the next character will erase)
-  			createSelection(prev.length, sValue.length);
-  		}
-  	};
-
-  	function showResults(){
-  		// get the position of the input field right now (in case the DOM is shifted)
-  		var pos = findPos(input);
-  		// either use the specified width, or autocalculate based on form element
-  		var iWidth = (options.width > 0) ? options.width : $input.width();
-  		// reposition
-  		$results.css({
-  			width: parseInt(iWidth) + "px",
-  			top: (pos.y + input.offsetHeight) + "px",
-  			left: pos.x + "px"
-  		}).show();
-  	};
-
-  	function hideResults(){
-  		if(timeout) clearTimeout(timeout);
-  		timeout = setTimeout(hideResultsNow, 200);
-  	};
-
-  	function hideResultsNow(){
-  		if(timeout) clearTimeout(timeout);
-  		$input.removeClass(options.loadingClass);
-  		if($results.is(":visible")){
-  			$results.hide();
-  		}
-  		if(options.mustMatch){
-  			var v = $input.val();
-  			if(v != input.lastSelected){
-  				selectItem(null);
-  			}
-  		}
-  	};
-
-  	function receiveData(q, data){
-  		if(data){
-  			$input.removeClass(options.loadingClass);
-  			results.innerHTML = "";
-
-  			// if the field no longer has focus or if there are no matches, do not display the drop down
-  			if(!hasFocus || data.length == 0) return hideResultsNow();
-
-  			if($.browser.msie){
-  				// we put a styled iframe behind the calendar so HTML SELECT elements don't show through
-  				$results.append(document.createElement('iframe'));
-  			}
-  			results.appendChild(dataToDom(data));
-  			// autofill in the complete box w/the first match as long as the user hasn't entered in more data
-  			if(options.autoFill && ($input.val().toLowerCase() == q.toLowerCase())) autoFill(data[0][0]);
-  			showResults();
-  		} else {
-  			hideResultsNow();
-  		}
-  	};
-
-  	function parseData(data){
-  		if(!data) return null;
-  		var parsed = [];
-  		var rows = data.split(options.lineSeparator);
-  		for (var i=0; i < rows.length; i++){
-  			var row = $.trim(rows[i]);
-  			if(row){
-  				parsed[parsed.length] = row.split(options.cellSeparator);
-  			}
-  		}
-  		return parsed;
-  	};
-
-  	function dataToDom(data){
-  		var ul = document.createElement("ul");
-  		var num = data.length;
-
-  		// limited results to a max number
-  		if((options.maxItemsToShow > 0) && (options.maxItemsToShow < num)) num = options.maxItemsToShow;
-
-  		for (var i=0; i < num; i++){
-  			var row = data[i];
-  			if(!row) continue;
-  			var li = document.createElement("li");
-  			if(options.formatItem){
-  				li.innerHTML = options.formatItem(row, i, num);
-  				li.selectValue = row[0];
-  			} else {
-  				li.innerHTML = row[0];
-  				li.selectValue = row[0];
-  			}
-  			var extra = null;
-  			if(row.length > 1){
-  				extra = [];
-  				for (var j=1; j < row.length; j++){
-  					extra[extra.length] = row[j];
-  				}
-  			}
-  			li.extra = extra;
-  			ul.appendChild(li);
-  			$(li).hover(
-  				function(){ $("li", ul).removeClass("ac_over"); $(this).addClass("ac_over"); active = $("li", ul).indexOf($(this).get(0)); },
-  				function(){ $(this).removeClass("ac_over"); }
-  			).click(function(e){ e.preventDefault(); e.stopPropagation(); selectItem(this) });
-  		}
-  		return ul;
-  	};
-
-  	function requestData(q){
-  		if(!options.matchCase) q = q.toLowerCase();
-  		var data = options.cacheLength ? loadFromCache(q) : null;
-  		// recieve the cached data
-  		if(data){
-  			receiveData(q, data);
-  		// if an AJAX url has been supplied, try loading the data now
-  		} else if((typeof options.url == "string") && (options.url.length > 0)){
-  			$.get(makeUrl(q), function(data){
-  				data = parseData(data);
-  				addToCache(q, data);
-  				receiveData(q, data);
-  			});
-  		// if there's been no data found, remove the loading class
-  		} else {
-  			$input.removeClass(options.loadingClass);
-  		}
-  	};
-
-  	function makeUrl(q){
-  		var url = options.url + "?q=" + encodeURI(q);
-  		for (var i in options.extraParams){
-  			url += "&" + i + "=" + encodeURI(options.extraParams[i]);
-  		}
-  		return url;
-  	};
-
-  	function loadFromCache(q){
-  		if(!q) return null;
-  		if(cache.data[q]) return cache.data[q];
-  		for (var i = q.length - 1; i >= options.minChars; i--){
-  			var qs = q.substr(0, i);
-  			var c = cache.data[qs];
-  			if(c){
-  				var csub = [];
-  				for (var j = 0; j < c.length; j++){
-  					var x = c[j];
-  					var x0 = x[0];
-  					if( (options.match == 'subset' && matchSubset(x0, q))
-  					     ||
-  					    (options.match == 'quicksilver' && matchQuicksilver(x0, q))
-  					 ) csub[csub.length] = x;
-  				}
-  				return csub;
-  			}
-  		}
-  		return null;
-  	};
-
-  	function matchSubset(s, sub){
-  		if(!options.matchCase) s = s.toLowerCase();
-  		var i = s.indexOf(sub);
-  		if(i == -1) return false;
-  		return i == 0 || options.matchContains;
-  	};
-
-    function matchQuicksilver(s, sub){
-  		if(!options.matchCase) s = s.toLowerCase();
-  		return s.score(sub) > 0;
+    this.showResults = function(){
+    	// get the position of the input field right now (in case the DOM is shifted)
+    	var pos = findPos(this.text_input);
+    	// either use the specified width, or autocalculate based on form element
+    	var iWidth = (this.options.width > 0) ? this.options.width : $(this.text_input).width();
+    	// reposition
+    	$(this.results).css({
+    		width: parseInt(iWidth) + "px",
+    		top: (pos.y + this.text_input.offsetHeight) + "px",
+    		left: pos.x + "px"
+    	}).show();
     };
 
-  	this.flushCache = function(){
-  		flushCache();
+    function findPos(obj){
+    	var curleft = obj.offsetLeft || 0;
+    	var curtop = obj.offsetTop || 0;
+    	while (obj = obj.offsetParent){
+    		curleft += obj.offsetLeft
+    		curtop += obj.offsetTop
+    	}
+    	return {x:curleft,y:curtop};
+    }
+
+  	this.hideResults = function(){
+  	  var that = this;
+  		if(this.timeout) clearTimeout(this.timeout);
+  		this.timeout = setTimeout(function(){that.hideResultsNow()}, 200);
   	};
 
-  	this.setExtraParams = function(p){
-  		options.extraParams = p;
+  	this.hideResultsNow = function(){
+  		if(this.timeout)
+  		  clearTimeout(this.timeout);
+  		$(this.text_input).removeClass(this.options.loadingClass);
+  		if($(this.results).is(":visible"))
+  		  $(this.results).hide();
+			if(this.options.mustMatch && $(this.text_input).val() != this.text_input.lastSelected)
+			  this.selectItem(null);
   	};
 
-  	this.findValue = function(){
-  		var q = $input.val();
-
-  		if(!options.matchCase) q = q.toLowerCase();
-  		var data = options.cacheLength ? loadFromCache(q) : null;
-  		if(data){
-  			findValueCallback(q, data);
-  		} else if((typeof options.url == "string") && (options.url.length > 0)){
-  			$.get(makeUrl(q), function(data){
-  				data = parseData(data)
-  				addToCache(q, data);
-  				findValueCallback(q, data);
-  			});
+  	this.onChange = function(){
+  		// ignore if the following keys are pressed: [del] [shift] [capslock]
+  		if(this.last_keyCode == 46 || (this.last_keyCode > 8 && this.last_keyCode < 32)) return $(this.results).hide();
+  		var v = $(this.text_input).val();
+  		if(v == this.previous_value)return;
+  		this.previous_value = v;
+  		if(v.length >= this.options.minChars){
+  			$(this.text_input).addClass(this.options.loadingClass);
+        this.populater.populate(v);
   		} else {
-  			// no matches
-  			findValueCallback(q, null);
+  		  if((this.options.onBlank && this.options.onBlank()) || true){ // onBlank callback
+  		    this.options.update_fields.each(function(i,input){
+            $(input).val('');
+          });
+  		  }
+        
+  			$(this.text_input).removeClass(this.options.loadingClass);
+  			$(this.results).hide();
   		}
-  	}
-
-  	function findValueCallback(q, data){
-  		if(data) $input.removeClass(options.loadingClass);
-
-  		var num = (data) ? data.length : 0;
-  		var li = null;
-
-  		for (var i=0; i < num; i++){
-  			var row = data[i];
-
-  			if(row[0].toLowerCase() == q.toLowerCase()){
-  				li = document.createElement("li");
-  				if(options.formatItem){
-  					li.innerHTML = options.formatItem(row, i, num);
-  					li.selectValue = row[0];
-  				} else {
-  					li.innerHTML = row[0];
-  					li.selectValue = row[0];
-  				}
-  				var extra = null;
-  				if(row.length > 1){
-  					extra = [];
-  					for (var j=1; j < row.length; j++){
-  						extra[extra.length] = row[j];
-  					}
-  				}
-  				li.extra = extra;
-  			}
-  		}
-
-  		if(options.onFindValue) setTimeout(function(){ options.onFindValue(li) }, 1);
-  	}
-
-  	function addToCache(q, data){
-  		if(!data || !q || !options.cacheLength) return;
-  		if(!cache.length || cache.length > options.cacheLength){
-  			flushCache();
-  			cache.length++;
-  		} else if(!cache[q]){
-  			cache.length++;
-  		}
-  		cache.data[q] = data;
   	};
 
-  	function findPos(obj){
-  		var curleft = obj.offsetLeft || 0;
-  		var curtop = obj.offsetTop || 0;
-  		while (obj = obj.offsetParent){
-  			curleft += obj.offsetLeft
-  			curtop += obj.offsetTop
-  		}
-  		return {x:curleft,y:curtop};
-  	}
+    this.autoFill = function(str){
+    	// if the last user key pressed was backspace, don't autofill
+    	if(this.last_keyCode != 8){
+    		// fill in the value (keep the case the user has typed)
+    		$(this.text_input).val($(this.text_input).val() + str.substring(this.previous_value.length));
+    		// select the portion of the value not typed by the user (so the next character will erase)
+    		createSelection(this, this.previous_value.length, str.length);
+    	}
+    };
+
+    function createSelection(that, start, end){
+    	// get a reference to the input element
+    	var field = $(that.text_input).get(0);
+    	if(field.createTextRange){
+    		var selRange = field.createTextRange();
+    		selRange.collapse(true);
+    		selRange.moveStart("character", start);
+    		selRange.moveEnd("character", end);
+    		selRange.select();
+    	} else if(field.setSelectionRange){
+    		field.setSelectionRange(start, end);
+    	} else {
+    		if(field.selectionStart){
+    			field.selectionStart = start;
+    			field.selectionEnd = end;
+    		}
+    	}
+    	field.focus();
+    };
+
+    this.populater = function(mode){
+      if(mode == 'ajax') return new AjaxPopulate(this);
+      if(mode == 'data') return new DataPopulate(this);
+    };
+
+    this.populate_list = function(q, data){
+    	if(data){
+    		$(this.text_input).removeClass(this.options.loadingClass);
+    		this.results.innerHTML = "";
+
+    		// if the field no longer has focus or if there are no matches, do not display the drop down
+    		if(!this.hasFocus || data.length == 0) return this.hideResultsNow();
+
+    		this.results.appendChild(dataToDom(data, this));
+    		if(this.options.autoFill && ($(this.text_input).val().toLowerCase() == q.toLowerCase())) this.autoFill(data[0][0]); // autoFill the typing box, if option allows
+    		this.showResults();
+  			if(this.options.autoSelectFirst || (this.options.selectOnly && data.length == 1)) this.moveSelect(0); // selects current selection or top listing if none, if option allows
+    	} else {
+    		this.hideResultsNow();
+    	}
+    };
+
+    function dataToDom(data, that){
+    	var ul = document.createElement("ul");
+
+    	var num = data.length;
+    	// limited results to a max number
+    	if((that.options.maxItemsToShow > 0) && (that.options.maxItemsToShow < num)) num = that.options.maxItemsToShow;
+
+    	for (var i=0; i < num; i++){
+    		var row = data[i];
+    		if(!row) continue;
+    		var li = document.createElement("li");
+    		if(that.options.formatItem){
+    			li.innerHTML = that.options.formatItem(row, i, num);
+    			li.selectValue = row[0];
+    		} else {
+    			li.innerHTML = row[0];
+    			li.selectValue = row[0];
+    		}
+    		var values = [];
+  			for(var j=0; j < row.length; j++){
+  				values[values.length] = row[j];
+  			}
+    		li.values = values;
+    		ul.appendChild(li);
+    		$(li).hover(
+    			function(){ $("li", ul).removeClass(that.options.selectedClass); $(this).addClass(that.options.selectedClass); that.active = $("li", ul).indexOf($(this).get(0)) },
+    			function(){ $(this).removeClass(that.options.selectedClass) }
+    		).click(function(e){ e.preventDefault(); e.stopPropagation(); that.selectItem(this) });
+    	}
+    	return ul;
+    };
   }
 
+  // The QuickSelect Maker...
+  function QuickSelect(text_input, options){
+    var that = this;
+    this.text_input = text_input; // make public
+    this.options = options; // make public
+  	text_input.quickselector = this;
+
+  	// Create jQuery object for input element.
+    var $text_input = $(text_input).attr("quickselect", "off");
+
+  	// Apply inputClass if necessary.
+  	if(options.inputClass) $text_input.addClass(options.inputClass);
+
+  	// Create results.
+  	var results = document.createElement("div");
+  	this.results = results; // make public
+
+  	// Create jQuery object for results.
+  	var $results = $(results);
+  	$results.hide().addClass(options.resultsClass).css("position", "absolute");
+  	if(options.width > 0) $results.css("width", options.width);
+
+  	// Add to body element.
+  	$("body").append(results);
+
+    // Initialize the cache
+  	this.flushCache();
+
+    // Attach the action!
+  	this.active = -1;
+  	this.previous_value = '';
+  	this.timeout = null;
+  	this.last_keyCode = null;
+  	
+    $text_input
+  	.keydown(function(e){
+  		that.last_keyCode = e.keyCode;
+  		switch(e.keyCode){
+  			case 38: // up arrow - select prev item in the drop-down
+  				e.preventDefault();
+  				that.moveSelect(-1);
+  				break;
+  			case 40: // down arrow - select next item in the drop-down
+  				e.preventDefault();
+  				that.moveSelect(1);
+  				break;
+  			case 13: // return - select item and blur field
+  				if(that.selectCurrent()){
+  					e.preventDefault();
+  					$text_input.get(0).select();
+  				}
+  				break;
+  			case 9:  // tab - select the currently selected, let the regular stuff happen
+  			  that.selectCurrent();
+  			default:
+  				that.active = 0;
+  				if(that.timeout) clearTimeout(that.timeout);
+  				that.timeout = setTimeout(function(){that.onChange()}, options.delay);
+  				break;
+  		}
+  	})
+  	.focus(function(){
+  		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
+  		that.hasFocus = true;
+  	})
+  	.blur(function(){
+  		// track whether the field has focus
+  		that.hasFocus = false;
+  		that.hideResults();
+  	});
+
+    this.populater = this.populater(options.url ? 'ajax' : 'data');
+
+  	this.hideResultsNow();
+  };
+  QuickSelect.prototype = new QuickSelectPrototype();
+
+  // Make the quickselect form control...
   $.fn.quickselect = function(options, data){
-  	// Make sure options exists
+    // Prepare options and set defaults.
   	options = options || {};
-  	// Set url as option
-  	options.url = options.url || options.ajax;
-  	// set some bulk local data
-  	options.data = ((typeof data == "object") && (data.constructor == Array)) ? data : null;
-
-  	// Set default values for required options
-  	options.inputClass = options.inputClass || "ac_input";
-  	options.resultsClass = options.resultsClass || "ac_results";
-  	options.lineSeparator = options.lineSeparator || "\n";
-  	options.cellSeparator = options.cellSeparator || "|";
-  	options.minChars = options.minChars || 1;
-  	options.delay = options.delay || 400;
-  	options.matchCase = options.matchCase || 0;
-    options.match = options.match || 'subset';
+  	options.url           = options.url || options.ajax;
+  	options.data          = ((typeof options.data == "object") && (options.data.constructor == Array)) ? options.data : null;
+  	options.inputClass    = options.inputClass || "auto_select_input";
+  	options.loadingClass  = options.loadingClass || "auto_select_loading";
+  	options.resultsClass  = options.resultsClass || "auto_select_results";
+  	options.selectedClass = options.selectedClass || "auto_select_selected";
+  	options.minChars      = options.minChars || 1;
+  	options.delay         = options.delay || 400;
+  	options.matchCase     = options.matchCase || 0;
+    options.match         = options.match || 'substring';
   	options.matchContains = options.matchContains || 0;
-  	options.cacheLength = options.cacheLength || 1;
-  	options.mustMatch = options.mustMatch || 0;
-  	options.extraParams = options.extraParams || {};
-  	options.loadingClass = options.loadingClass || "ac_loading";
-  	options.selectFirst = options.selectFirst || false;
-  	options.selectOnly = options.selectOnly || false;
+  	options.cacheLength   = options.cacheLength || 1;
+  	options.mustMatch     = options.mustMatch || 0;
+  	options.extraParams   = options.extraParams || {};
+  	options.autoSelectFirst = options.autoSelectFirst || false;
+  	options.selectOnly    = options.selectOnly || false;
   	options.maxItemsToShow = options.maxItemsToShow || -1;
-  	options.autoFill = options.autoFill || false;
+  	options.autoFill      = options.autoFill || false;
     if(options.match == 'quicksilver') options.autoFill = false; // if you're using the quicksilver match, it really doesn't help to autoFill.
-  	options.width = parseInt(options.width, 10) || 0;
+  	options.width         = parseInt(options.width, 10) || 0;
 
+    // Make quickselects.
   	this.each(function(){
   		var input = this;
-  		if(input.tagName == 'INPUT'){
-    		new $.quickselect(input, options);
+        var shadow_options = function(){};
+        shadow_options.prototype = options; // now a new instance of shadow "is a" options
+      var my_options = new shadow_options();
+
+  	  if(input.tagName == 'INPUT'){
+      	my_options.update_fields = my_options.update_fields || $(input);
+  	    new QuickSelect(input, my_options);
   		} else if(input.tagName == 'SELECT'){
         // Collect the data from the select/options, remove them and create an input box instead.
   		  var $select = $(input);
-  		  var data = [];
-  		  $select.find('option').each(function(i,option){
-  		    data[i] = [option.innerHTML, option.value];
-  		  });
+  		  my_options.data = [];
+    		  $select.find('option').each(function(i,option){
+    		    my_options.data[i] = [option.innerHTML, option.value];
+    		  });
 
         // Record the html stuff from the select
         var name = $select[0].name;
         var id = $select[0].id;
         var className = $select[0].className;
-        // get the currently selected value!
-        var selected = $select.find("option[selected=selected]")[0]
+
+        var selected = $select.find("option:selected")[0];
 
         // Create the text input and hidden input
-        var input = document.createElement("input");
-        input.type = 'text';
-      	input.className = className;
-      	if(selected) input.value = selected.innerHTML;
+        var text_input = document.createElement("input");
+        text_input.type = 'text';
+      	text_input.className = className;
+      	if(selected) text_input.value = selected.innerHTML;
       
         var hidden_input = document.createElement("input");
         hidden_input.type = 'hidden';
@@ -510,33 +458,14 @@
         hidden_input.name = $select[0].name;
       	if(selected) hidden_input.value = selected.value;
 
-        // Inject an extra piece to the onItemSelect callback to record the value to the hidden input
-        var prev_cb = options.onItemSelect;
-        options.onItemSelect = function(li) {
-        	hidden_input.value = li.extra[0];
-        	if(prev_cb) return prev_cb(li);
-        };
-        options.onBlank = function(){hidden_input.value = ''};
-
-        // Replace the select with a quickselect input!
-      	$select.after(input).after(hidden_input);
-      	$select.remove();
-      	$(input).quickselect(options, data);
-  		}
+        // We need to work off two values, from the label and value of the select options.
+        // Record the first (label) in the text input, the second (value) in the hidden input.
+        my_options.update_fields = $(text_input).add(hidden_input);
+        
+        // Replace the select with a quickselect text_input
+      	$select.after(text_input).after(hidden_input).remove();
+      	$(text_input).quickselect(my_options);
+      }
   	});
-
-  	// Don't break the chain
-  	return this;
-  }
-
-  $.fn.quickselectArray = function(data, options){
-  	return this.quickselect(options, data);
-  }
-
-  $.fn.indexOf = function(e){
-  	for( var i=0; i<this.length; i++){
-  		if(this[i] == e) return i;
-  	}
-  	return -1;
   };
 })(jQuery);
