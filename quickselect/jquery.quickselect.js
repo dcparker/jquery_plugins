@@ -10,7 +10,7 @@
     this.populate = function(value){
       var that = this;
     	if(!this.that.options.matchCase) value = value.toLowerCase();
-    	var data = this.that.options.cacheLength ? this.that.loadFromCache(value) : null;
+    	var data = this.that.cacheLength ? this.that.loadFromCache(value) : null;
       if(data){
         this.that.populate_list(value, data);
     	}else{
@@ -59,7 +59,7 @@
   				rows.push(row);                        // add row to blank lookup
     		}
     		// add the data items to the cache
-        this.that.options.cacheLength++;
+        this.that.cacheLength++;
   			this.that.addToCache('', rows);
 
     		callback(this.that.loadFromCache(value));
@@ -74,8 +74,8 @@
   		this.cache = {data:{},length:0};
   	};
   	this.addToCache = function(q, data){
-  		if(!data || !this.options.cacheLength) return;
-  		if(!this.cache.length || this.cache.length > this.options.cacheLength){
+  		if(!data || !this.cacheLength) return;
+  		if(!this.cache.length || this.cache.length > this.cacheLength){
   			this.flushCache();
   			this.cache.length++;
   		} else if(!this.cache[q]){
@@ -390,6 +390,7 @@
   		that.hideResults();
   	});
 
+    this.cacheLength = 1;
     this.populater = this.populater(options.url ? 'ajax' : 'data');
 
   	this.hideResultsNow();
@@ -411,7 +412,6 @@
   	options.matchCase     = options.matchCase || 0;
     options.match         = options.match || 'substring';
   	options.matchContains = options.matchContains || 0;
-  	options.cacheLength   = options.cacheLength || 1;
   	options.mustMatch     = options.mustMatch || 0;
   	options.extraParams   = options.extraParams || {};
   	options.autoSelectFirst = options.autoSelectFirst || false;
