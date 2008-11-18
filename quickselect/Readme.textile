@@ -15,6 +15,10 @@ h4. Installation
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
 #* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
 
+h4. Usage
+
+There are several modes in which you can use this plugin. The simplest may be just transforming a select/options group into a text input with drop-down. $('select').quickselect();
+
 h4. Options
 
 * url: if you want to load data via ajax, include a url. The query text will be appended as ?q=$value.
@@ -22,21 +26,20 @@ h4. Options
 * minChars: the minimum number of characters before triggering the drop-down (and ajax, if applicable).
 * delay: milliseconds after typing that the results are re-evaluated. Make this longer if your ajax is bogging down.
 * matchCase: specify that the drop-down should be case-sensitive.
-* match: 'substring' for exact match-as-you-type, 'quicksilver' for similarity matching.
+* match: 'substring' for exact match-as-you-type, 'quicksilver' for similarity matching. Auto-detects whether quicksilver.js is included and active, and defaults to quicksilver mode if it can.
 * matchContains: use with 'substring' only, means that what you type can match anywhere in the choice item, not just the beginning.
-* mustMatch: if you're not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end.
+* mustMatch: if you're not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additional_fields instantly get blank values.
 * extraParams: extra parameters for the ajax url.
 * autoSelectFirst: keep the first item selected as you type, and tab or enter will automatically fill in the rest from the top item.
 * selectOnly: use if not using autoSelectFirst, use this to make the control automatically select the top item if there is only one item left.
 * maxItemsToShow: only show up to x number of items.
+* additional_fields: (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.
 * autoFill: use this if you want the text input to automatically try to finish what you're typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you're typing.
 * width: set the width of the drop-down list.
-* Styling:
-** inputClass: class for the text input
-** loadingClass: an extra class for the text input while loading
-** resultsClass: class on the drop-down list
-** selectedClass: class for the currently-selected item in the drop-down list
-
+* inputClass: css class for styling the text input
+* loadingClass: an extra css class for styling the text input while loading
+* resultsClass: css class for styling the drop-down list
+* selectedClass: css class for styling the currently-selected item in the drop-down list
 
 h4. Credit
 

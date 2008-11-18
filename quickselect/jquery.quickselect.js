@@ -150,11 +150,16 @@
   			this.selectItem(li);
   			return true;
   		} else {
+        // blank the fields if options.mustMatch
+        if(this.options.mustMatch)
+  		    this.options.additional_fields.each(function(i,input){
+            $(input).val('');
+          });
   			return false;
   		}
   	};
 
-  	this.selectItem = function(li){
+  	this.selectItem = function(li,from_hide_now_function){
       var that = this;
 
   		if(!li){
@@ -165,12 +170,13 @@
   		this.text_input.lastSelected = $.trim(li.values[0] || li.innerHTML);
       // TODO: debug whether this should be the $.trim'd version or not.
   		this.previous_value = v;
-  		$(this.results).html("");
+  		this.$results.html("");
   		
-      this.options.update_fields.each(function(i,input){
+      this.options.additional_fields.each(function(i,input){
         $(input).val(li.values[i]);
       });
-      this.hideResultsNow();
+      if(!from_hide_now_function)
+        this.hideResultsNow();
   		if(this.options.onItemSelect) setTimeout(function(){ that.options.onItemSelect(li) }, 1);
   	};
 
@@ -178,9 +184,9 @@
     	// get the position of the input field right now (in case the DOM is shifted)
     	var pos = findPos(this.text_input);
     	// either use the specified width, or autocalculate based on form element
-    	var iWidth = (this.options.width > 0) ? this.options.width : $(this.text_input).width();
+    	var iWidth = (this.options.width > 0) ? this.options.width : this.$text_input.width();
     	// reposition
-    	$(this.results).css({
+    	this.$results.css({
     		width: parseInt(iWidth) + "px",
     		top: (pos.y + this.text_input.offsetHeight) + "px",
     		left: pos.x + "px"
@@ -206,31 +212,31 @@
   	this.hideResultsNow = function(){
   		if(this.timeout)
   		  clearTimeout(this.timeout);
-  		$(this.text_input).removeClass(this.options.loadingClass);
-  		if($(this.results).is(":visible"))
-  		  $(this.results).hide();
-			if(this.options.mustMatch && $(this.text_input).val() != this.text_input.lastSelected)
-			  this.selectItem(null);
+  		this.$text_input.removeClass(this.options.loadingClass);
+  		if(this.$results.is(":visible"))
+  		  this.$results.hide();
+			if(this.options.mustMatch && this.$text_input.val() != this.text_input.lastSelected)
+			  this.selectItem(null,true);
   	};
 
   	this.onChange = function(){
   		// ignore if the following keys are pressed: [del] [shift] [capslock]
-  		if(this.last_keyCode == 46 || (this.last_keyCode > 8 && this.last_keyCode < 32)) return $(this.results).hide();
-  		var v = $(this.text_input).val();
+  		if(this.last_keyCode == 46 || (this.last_keyCode > 8 && this.last_keyCode < 32)) return this.$results.hide();
+  		var v = this.$text_input.val();
   		if(v == this.previous_value)return;
   		this.previous_value = v;
   		if(v.length >= this.options.minChars){
-  			$(this.text_input).addClass(this.options.loadingClass);
+  			this.$text_input.addClass(this.options.loadingClass);
         this.populater.populate(v);
   		} else {
   		  if((this.options.onBlank && this.options.onBlank()) || true){ // onBlank callback
-  		    this.options.update_fields.each(function(i,input){
+  		    this.options.additional_fields.each(function(i,input){
             $(input).val('');
           });
   		  }
         
-  			$(this.text_input).removeClass(this.options.loadingClass);
-  			$(this.results).hide();
+  			this.$text_input.removeClass(this.options.loadingClass);
+  			this.$results.hide();
   		}
   	};
 
@@ -238,7 +244,7 @@
     	// if the last user key pressed was backspace, don't autofill
     	if(this.last_keyCode != 8){
     		// fill in the value (keep the case the user has typed)
-    		$(this.text_input).val($(this.text_input).val() + str.substring(this.previous_value.length));
+    		this.$text_input.val(this.$text_input.val() + str.substring(this.previous_value.length));
     		// select the portion of the value not typed by the user (so the next character will erase)
     		createSelection(this, this.previous_value.length, str.length);
     	}
@@ -271,14 +277,14 @@
 
     this.populate_list = function(q, data){
     	if(data){
-    		$(this.text_input).removeClass(this.options.loadingClass);
+    		this.$text_input.removeClass(this.options.loadingClass);
     		this.results.innerHTML = "";
 
     		// if the field no longer has focus or if there are no matches, do not display the drop down
     		if(!this.hasFocus || data.length == 0) return this.hideResultsNow();
 
     		this.results.appendChild(dataToDom(data, this));
-    		if(this.options.autoFill && ($(this.text_input).val().toLowerCase() == q.toLowerCase())) this.autoFill(data[0][0]); // autoFill the typing box, if option allows
+    		if(this.options.autoFill && (this.$text_input.val().toLowerCase() == q.toLowerCase())) this.autoFill(data[0][0]); // autoFill the typing box, if option allows
     		this.showResults();
   			if(this.options.autoSelectFirst || (this.options.selectOnly && data.length == 1)) this.moveSelect(0); // selects current selection or top listing if none, if option allows
     	} else {
@@ -328,6 +334,7 @@
 
   	// Create jQuery object for input element.
     var $text_input = $(text_input).attr("quickselect", "off");
+    this.$text_input = $text_input;
 
   	// Apply inputClass if necessary.
   	if(options.inputClass) $text_input.addClass(options.inputClass);
@@ -335,6 +342,7 @@
   	// Create results.
   	var results = document.createElement("div");
   	this.results = results; // make public
+  	this.$results = $(results);
 
   	// Create jQuery object for results.
   	var $results = $(results);
@@ -402,23 +410,20 @@
     // Prepare options and set defaults.
   	options = options || {};
   	options.url           = options.url || options.ajax;
+  	options.extraParams   = options.extraParams || {};
   	options.data          = ((typeof options.data == "object") && (options.data.constructor == Array)) ? options.data : null;
+  	options.minChars      = options.minChars || 1;
   	options.inputClass    = options.inputClass || "auto_select_input";
   	options.loadingClass  = options.loadingClass || "auto_select_loading";
   	options.resultsClass  = options.resultsClass || "auto_select_results";
   	options.selectedClass = options.selectedClass || "auto_select_selected";
-  	options.minChars      = options.minChars || 1;
-  	options.delay         = options.delay || 400;
-  	options.matchCase     = options.matchCase || 0;
-    options.match         = options.match || 'substring';
-  	options.matchContains = options.matchContains || 0;
-  	options.mustMatch     = options.mustMatch || 0;
-  	options.extraParams   = options.extraParams || {};
-  	options.autoSelectFirst = options.autoSelectFirst || false;
-  	options.selectOnly    = options.selectOnly || false;
+    options.match         = options.match || ((typeof ''.score == 'function') && 'l'.score('l') == 1 ? 'quicksilver' : 'substring');
+  	options.matchContains = options.matchContains || false;
+  	options.autoSelectFirst = options.autoSelectFirst || true;
+  	options.selectOnly    = options.selectOnly || true;
   	options.maxItemsToShow = options.maxItemsToShow || -1;
   	options.autoFill      = options.autoFill || false;
-    if(options.match == 'quicksilver') options.autoFill = false; // if you're using the quicksilver match, it really doesn't help to autoFill.
+      if(options.match == 'quicksilver') options.autoFill = false; // if you're using the quicksilver match, it really doesn't help to autoFill.
   	options.width         = parseInt(options.width, 10) || 0;
 
     // Make quickselects.
@@ -429,9 +434,17 @@
       var my_options = new shadow_options();
 
   	  if(input.tagName == 'INPUT'){
-      	my_options.update_fields = my_options.update_fields || $(input);
+      	my_options.delay         = my_options.delay || 400;
+      	my_options.matchCase     = my_options.matchCase || false;
+      	my_options.mustMatch     = my_options.mustMatch || false;
+      	my_options.additional_fields = $(input).add(my_options.additional_fields);
+
   	    new QuickSelect(input, my_options);
   		} else if(input.tagName == 'SELECT'){
+      	my_options.delay         = my_options.delay || 10; // for selects, we know we're not doing ajax, so we might as well speed up
+      	my_options.matchCase     = my_options.matchCase || false;
+      	my_options.mustMatch     = my_options.mustMatch || true;
+
         // Collect the data from the select/options, remove them and create an input box instead.
   		  var $select = $(input);
   		  my_options.data = [];
@@ -460,7 +473,7 @@
 
         // We need to work off two values, from the label and value of the select options.
         // Record the first (label) in the text input, the second (value) in the hidden input.
-        my_options.update_fields = $(text_input).add(hidden_input);
+        my_options.additional_fields = $(hidden_input);
         
         // Replace the select with a quickselect text_input
       	$select.after(text_input).after(hidden_input).remove();

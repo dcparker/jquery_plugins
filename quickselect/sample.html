@@ -186,24 +186,13 @@ function lookupLocal(){
 }
 
 $(function(){
-	$("#city_select").quickselect({
-		delay:10,
-		minChars:1,
-		match:'quicksilver',
-		// autoFill:true,
-		// selectOnly:true,
-		autoSelectFirst:true,
-		maxItemsToShow:12
-	});
+	$("#city_select").quickselect();
 
 	$('#CityAjax').quickselect({
-		minChars:1,
-		delay:10,
 		ajax:'As.json',
-		match:'quicksilver',
-		autoSelectFirst:true,
-		update_fields:$('#CityAjax').add('#other_thing_field'),
-		maxItemsToShow:10,
+		match:'substring',
+		autoSelectFirst:false,
+		additional_fields:$('#other_thing_field')
 	});
 });
 </script>
