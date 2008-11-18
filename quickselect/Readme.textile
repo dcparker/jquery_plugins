@@ -1,10 +1,11 @@
 h1. jQuery: QuickSelect
 
-The QuickSelect plugin allows you to create a text input with a list of specified options, and as you type, those options show up in a list below the input box. You can choose to have it auto-fill the top result into the input box as you type, or select an option using the arrow keys. This is a remake of http://www.pengoworks.com/workshop/jquery/autocomplete.htm with quicksilver ranking added in as an option.
+The QuickSelect plugin allows you to create a text input with a list of specified options, and as you type, those options show up in a list below the input box. You can choose to have it auto-fill the top result into the input box as you type, or select an option using the arrow keys. This is a complete rewrite of http://www.pengoworks.com/workshop/jquery/autocomplete.htm with [optional] quicksilver ranking and multi-field update added in.
 
-There are two special powers of this plugin:
+There are a few special powers of this plugin:
 # QuickSilver selection mode: As you type, it will use quicksilver ranking mode, and the top result will automatically be selected when you exit the field.
 # Select/Options transformation: If you run .quickselect() on a select element, the data from the options will be stored and the select will be turned into an input box of the same id and className(s), and a hidden input of the same name. That way, instead of using a select, the user can simply type what they want and choose from the list. Just render your HTML page with a select and options, and run this plugin to turn it into a quickselect.
+# Multiple-field update: Send a jquery object containing multiple input elements, and include a corresponding number of values in the results data, and each input element will be updated with its corresponding value from the data when an item is selected from the drop-down list.
 
 h4. Installation
 
@@ -14,6 +15,31 @@ h4. Installation
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
 #* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
 
+h4. Options
+
+* url: if you want to load data via ajax, include a url. The query text will be appended as ?q=$value.
+* data: include data here if you aren't using ajax.
+* minChars: the minimum number of characters before triggering the drop-down (and ajax, if applicable).
+* delay: milliseconds after typing that the results are re-evaluated. Make this longer if your ajax is bogging down.
+* matchCase: specify that the drop-down should be case-sensitive.
+* match: 'substring' for exact match-as-you-type, 'quicksilver' for similarity matching.
+* matchContains: use with 'substring' only, means that what you type can match anywhere in the choice item, not just the beginning.
+* mustMatch: if you're not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end.
+* extraParams: extra parameters for the ajax url.
+* autoSelectFirst: keep the first item selected as you type, and tab or enter will automatically fill in the rest from the top item.
+* selectOnly: use if not using autoSelectFirst, use this to make the control automatically select the top item if there is only one item left.
+* maxItemsToShow: only show up to x number of items.
+* autoFill: use this if you want the text input to automatically try to finish what you're typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you're typing.
+* width: set the width of the drop-down list.
+* Styling:
+** inputClass: class for the text input
+** loadingClass: an extra class for the text input while loading
+** resultsClass: class on the drop-down list
+** selectedClass: class for the currently-selected item in the drop-down list
+
+
 h4. Credit
 
-Thank you to "Sabretech":http://www.sabretechllc.com/ for commissioning this project!
+http://www.pengoworks.com/workshop/jquery/autocomplete.htm - original starting point
+
+Thank you to "Sabretech":http://www.sabretechllc.com/ and "Argent":http://www.argenttitleresearch.com/ for commissioning this project!
