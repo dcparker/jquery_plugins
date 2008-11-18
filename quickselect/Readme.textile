@@ -1,6 +1,6 @@
 h1. jQuery: QuickSelect
 
-The QuickSelect plugin allows you to create a text input with a list of specified options, and as you type, those options show up in a list below the input box. You can choose to have it auto-fill the top result into the input box as you type, or select an option using the arrow keys. This is a complete rewrite of http://www.pengoworks.com/workshop/jquery/autocomplete.htm with [optional] quicksilver ranking and multi-field update added in.
+The QuickSelect plugin allows you to create a text input with a list of specified options, and as you type, those options show up in a list below the input box. You can choose to have it auto-fill the top result into the input box as you type, or select an option using the arrow keys.
 
 There are a few special powers of this plugin:
 # QuickSilver selection mode: As you type, it will use quicksilver ranking mode, and the top result will automatically be selected when you exit the field.
@@ -13,7 +13,7 @@ h4. Installation
 # Then you'll need the following files for this plugin:
 #* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
-#* "jquery.autocomplete.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.autocomplete.css?raw=true
+#* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.css?raw=true
 
 h4. Usage
 
