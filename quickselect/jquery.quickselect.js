@@ -150,8 +150,8 @@
   			this.selectItem(li);
   			return true;
   		} else {
-        // blank the fields if options.mustMatch
-        if(this.options.mustMatch)
+        // blank the fields if options.mustMatch and current value isn't valid.
+        if(this.options.mustMatch && this.loadFromCache(this.$text_input.val().toLowerCase()).length == 0)
   		    this.options.additional_fields.each(function(i,input){
             $(input).val('');
           });
