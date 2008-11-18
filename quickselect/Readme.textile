@@ -40,6 +40,6 @@ h4. Options
 
 h4. Credit
 
-http://www.pengoworks.com/workshop/jquery/autocomplete.htm - original starting point
+"http://www.pengoworks.com/workshop/jquery/autocomplete.htm":http://www.pengoworks.com/workshop/jquery/autocomplete.htm - original starting point
 
 Thank you to "Sabretech":http://www.sabretechllc.com/ and "Argent":http://www.argenttitleresearch.com/ for commissioning this project!
