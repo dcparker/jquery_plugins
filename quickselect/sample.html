@@ -56,7 +56,9 @@
         url:'ask.json',
         match:'substring',
         autoSelectFirst:false,
-        additional_fields:$('#other_thing_field')
+        mustMatch:true,
+        additional_fields:$('#other_thing_field'),
+        formatItem:function(data, index, total){return ''+index+'/'+total+'. '+data[0]+" ("+data[1]+")"}
       });
     &lt;/script&gt;
   </code>
@@ -115,6 +117,11 @@
           <option value='43'>Ava</option>
           <option value='44'>Avon</option>
         </select>
+				<br />
+				Note that for a converted select group, some option defaults change:<br />
+				{mustMatch : true, autoSelectFirst : true}<br />
+				Also, some options are effectively disabled:<br />
+				url, data, additional_fields.
       </p>
 <pre style='background-color: #DDD; border: 1px dotted black'>
   <code>
@@ -391,7 +398,9 @@
       url:'ask.json',
       match:'substring',
       autoSelectFirst:false,
-      additional_fields:$('#other_thing_field')
+			mustMatch:true,
+      additional_fields:$('#other_thing_field'),
+      formatItem:function(data, index, total){return ""+index+"/"+total+". "+data[0]+" ("+data[1]+")"}
     });
 
     $("#ExampleThree_OptionsData").quickselect();
