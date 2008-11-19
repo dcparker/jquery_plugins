@@ -1,3 +1,8 @@
+// TODO:  (PUT CHANGES ALSO IN PACKED VERSION!!)
+//   X) Add list choice formatting option
+//   2) Copy the id also to the text_input, but with _quickselect appended.
+//   3) Copy accesskey and tabindex to the text_input
+//   4) Copy [tab] code to onblur callback
 (function($){
   $.fn.indexOf = function(e){
   	for( var i=0; i<this.length; i++){
@@ -303,13 +308,7 @@
     		var row = data[i];
     		if(!row) continue;
     		var li = document.createElement("li");
-    		if(that.options.formatItem){
-    			li.innerHTML = that.options.formatItem(row, i, num);
-    			li.selectValue = row[0];
-    		} else {
-    			li.innerHTML = row[0];
-    			li.selectValue = row[0];
-    		}
+  			li.innerHTML = that.options.formatItem ? that.options.formatItem(row, i, num) : row[0];
     		var values = [];
   			for(var j=0; j < row.length; j++){
   				values[values.length] = row[j];
