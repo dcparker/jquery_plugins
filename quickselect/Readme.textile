@@ -45,6 +45,7 @@ h4. Options
 * additional_fields: (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.
 * autoFill: use this if you want the text input to automatically try to finish what you're typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you're typing.
 * width: set the width of the drop-down list.
+* formatItem: assign a function to use for formatting the list items. The function is called with arguments: data, index, total.
 * inputClass: css class for styling the text input
 * loadingClass: an extra css class for styling the text input while loading
 * resultsClass: css class for styling the drop-down list

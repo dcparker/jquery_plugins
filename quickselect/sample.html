@@ -180,6 +180,7 @@
     <li><b>additional_fields:</b> (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.</li>
     <li><b>autoFill:</b> use this if you want the text input to automatically try to finish what you’re typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you’re typing.</li>
     <li><b>width:</b> set the width of the drop-down list.</li>
+		<li><b>formatItem:</b> assign a function to use for formatting the list items. The function is called with arguments: data, index, total. See example #2.
     <li><b>inputClass:</b> css class for styling the text input</li>
     <li><b>loadingClass:</b> an extra css class for styling the text input while loading</li>
     <li><b>resultsClass:</b> css class for styling the drop-down list</li>
