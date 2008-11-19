@@ -1,8 +1,3 @@
-// TODO:  (PUT CHANGES ALSO IN PACKED VERSION!!)
-//   X) Add list choice formatting option
-//   2) Copy the id also to the text_input, but with _quickselect appended.
-//   3) Copy accesskey and tabindex to the text_input
-//   4) Copy [tab] code to onblur callback
 (function($){
   $.fn.indexOf = function(e){
   	for( var i=0; i<this.length; i++){
@@ -392,6 +387,7 @@
   		that.hasFocus = true;
   	})
   	.blur(function(){
+		  that.selectCurrent();
   		// track whether the field has focus
   		that.hasFocus = false;
   		that.hideResults();
@@ -455,6 +451,8 @@
         var name = $select[0].name;
         var id = $select[0].id;
         var className = $select[0].className;
+        var accesskey = $select.attr('accesskey');
+        var tabindex = $select.attr('tabindex');
 
         var selected = $select.find("option:selected")[0];
 
@@ -462,6 +460,9 @@
         var text_input = document.createElement("input");
         text_input.type = 'text';
       	text_input.className = className;
+      	text_input.id = id + '_quickselect';
+      	$(text_input).attr('accesskey', accesskey);
+      	$(text_input).attr('tabindex', tabindex);
       	if(selected) text_input.value = selected.innerHTML;
       
         var hidden_input = document.createElement("input");
