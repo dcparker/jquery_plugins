@@ -461,6 +461,7 @@
         text_input.type = 'text';
       	text_input.className = className;
       	text_input.id = id + '_quickselect';
+      	$(text_input).attr('autocomplete', 'off');
       	$(text_input).attr('accesskey', accesskey);
       	$(text_input).attr('tabindex', tabindex);
       	if(selected) text_input.value = selected.innerHTML;
