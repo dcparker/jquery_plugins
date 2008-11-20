@@ -229,7 +229,7 @@
   			this.$text_input.addClass(this.options.loadingClass);
         this.populater.populate(v);
   		} else {
-  		  if((this.options.onBlank && this.options.onBlank()) || true){ // onBlank callback
+  		  if(v.length == 0 && (this.options.onBlank ? this.options.onBlank() : true)){ // onBlank callback
   		    this.options.additional_fields.each(function(i,input){
             $(input).val('');
           });
