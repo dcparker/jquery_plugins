@@ -1,3 +1,4 @@
+// TODO: Allow tabbing out of field while delaying tab action (such as autoSelectFirst or mustMatch) until after ajax loads.
 (function($){
   $.fn.indexOf = function(e){
   	for( var i=0; i<this.length; i++){
@@ -151,7 +152,8 @@
   			return true;
   		} else {
         // blank the fields if options.mustMatch and current value isn't valid.
-        if(this.options.mustMatch && this.loadFromCache(this.$text_input.val().toLowerCase()).length == 0)
+        var cache = this.loadFromCache(this.$text_input.val().toLowerCase());
+        if(this.options.mustMatch && cache && cache.length == 0)
   		    this.options.additional_fields.each(function(i,input){
             $(input).val('');
           });
@@ -336,10 +338,21 @@
   	// Create results.
   	var results = document.createElement("div");
   	this.results = results; // make public
-  	this.$results = $(results);
 
   	// Create jQuery object for results.
   	var $results = $(results);
+  	this.$results = $results;
+
+    // Added by Anders Retterås
+    // Added functionality to track clicking on scrollbars in MSIE / Opera
+    // Workaround prevents onblur event to fire on txt input below
+    var clickedLI = true;
+    $results.mousedown(function(e){
+      // If not mozilla, mark that actual item was clicked if clicked item was NOT a DIV
+      if(!$.browser.mozilla)
+        clickedLI = e.srcElement.tagName != "DIV";
+    });
+
   	$results.hide().addClass(options.resultsClass).css("position", "absolute");
   	if(options.width > 0) $results.css("width", options.width);
 
@@ -386,11 +399,18 @@
   		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
   		that.hasFocus = true;
   	})
-  	.blur(function(){
-		  that.selectCurrent();
-  		// track whether the field has focus
-  		that.hasFocus = false;
-  		that.hideResults();
+  	.blur(function(e){
+      // Added by Anders Retterås
+      // Added functionality to track clicking on scrollbars in MSIE / Opera
+      // Workaround prevents onblur event to fire on txt input below
+      if(clickedLI){
+  		  that.selectCurrent();
+    		// track whether the field has focus
+    		that.hasFocus = false;
+    		that.hideResults();
+      }else{
+        e.srcElement.focus();
+      }
   	});
 
     this.cacheLength = 1;
