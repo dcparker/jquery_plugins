@@ -28,7 +28,7 @@
     &lt;script&gt;
     $('#ExampleOne_LocalData').quickselect({
       maxItemsToShow:10,
-      data:["Aberdeen", "Ada", "Adamsville", "Addyston", "Adelphi", "Adena", "Adrian", "Akron"]}) // truncated data...
+      data:["Aberdeen", "Ada", "Adamsville", ["Addyston", "Addyston", 'closed'], "Adelphi", "Adena", "Adrian", "Akron"]}) // truncated data...
     &lt;/script&gt;
   </code>
 </pre>
@@ -192,7 +192,7 @@
     $('#ExampleOne_LocalData').quickselect({
       maxItemsToShow:10,
       data:[
-        "Aberdeen", "Ada", "Adamsville", "Addyston", "Adelphi", "Adena", "Adrian", "Akron",
+        "Aberdeen", "Ada", "Adamsville", ["Addyston", 'Addyston', 'closed'], "Adelphi", "Adena", "Adrian", "Akron",
         "Albany", "Alexandria", "Alger", "Alledonia", "Alliance", "Alpha", "Alvada",
         "Alvordton", "Amanda", "Amelia", "Amesville", "Amherst", "Amlin", "Amsden",
         "Amsterdam", "Andover", "Anna", "Ansonia", "Antwerp", "Apple Creek", "Arcadia",
@@ -398,6 +398,7 @@
     $('#ExampleTwo_AjaxData').quickselect({
       url:'ask.json',
       match:'substring',
+      delay:1,
       autoSelectFirst:false,
 			mustMatch:true,
       additional_fields:$('#other_thing_field'),

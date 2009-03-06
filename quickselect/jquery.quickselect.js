@@ -310,6 +310,7 @@
   			for(var j=0; j < row.length; j++){
   				values[values.length] = row[j];
   			}
+  			if(that.options.last_item_is_className) li.className = row[row.length-1]; // className is the last value given?
     		li.values = values;
     		ul.appendChild(li);
     		$(li).hover(
@@ -432,6 +433,7 @@
   	options.loadingClass  = options.loadingClass || "auto_select_loading";
   	options.resultsClass  = options.resultsClass || "auto_select_results";
   	options.selectedClass = options.selectedClass || "auto_select_selected";
+  	options.last_item_is_className = options.last_item_is_className || false;
     options.match         = options.match || ((typeof ''.score == 'function') && 'l'.score('l') == 1 ? 'quicksilver' : 'substring');
   	options.matchContains = options.matchContains || false;
   	options.autoSelectFirst = options.autoSelectFirst || true;
@@ -459,12 +461,13 @@
       	my_options.delay         = my_options.delay || 10; // for selects, we know we're not doing ajax, so we might as well speed up
       	my_options.matchCase     = my_options.matchCase || false;
       	my_options.mustMatch     = my_options.mustMatch || true;
+        my_options.last_item_is_className = true;
 
         // Collect the data from the select/options, remove them and create an input box instead.
   		  var $select = $(input);
   		  my_options.data = [];
     		  $select.find('option').each(function(i,option){
-    		    my_options.data[i] = [option.innerHTML, option.value];
+    		    my_options.data[i] = [option.innerHTML, option.value, option.className];
     		  });
 
         // Record the html stuff from the select
