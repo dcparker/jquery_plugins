@@ -5,7 +5,7 @@
   <title>jQuery : QuickSelect</title>
   <script type="text/javascript" src="jquery-1.2.6.pack.js"></script>
   <script type='text/javascript' src='quicksilver.js'></script>
-  <script type='text/javascript' src='jquery.quickselect.pack.js'></script>
+  <script type='text/javascript' src='jquery.qs2.pack.js'></script>
   <link rel="stylesheet" type="text/css" href="jquery.quickselect.css" />
 </head>
 
@@ -53,7 +53,7 @@
     
     &lt;script&gt;
       $('#ExampleTwo_AjaxData').quickselect({
-        url:'ask.json',
+        ajax:'ask.json',
         match:'substring',
         autoSelectFirst:false,
         mustMatch:true,
@@ -121,7 +121,7 @@
 				Note that for a converted select group, some option defaults change:<br />
 				{mustMatch : true, autoSelectFirst : true}<br />
 				Also, some options are effectively disabled:<br />
-				url, data, additional_fields.
+				ajax, data, additional_fields.
       </p>
 <pre style='background-color: #DDD; border: 1px dotted black'>
   <code>
@@ -147,6 +147,23 @@
 
 	<hr />
 
+  <!-- Example 4 -->
+  <h2>Another converted Select...</h2>
+  <p id='example_4'>
+    select/options tags converted to text input coupled with hidden input:<br />
+    City:
+    <select id='example_4_select' name='example_4'>
+      <option></option>
+      <option value="1">Cornerstone Title Insurance Agency</option>
+      <option value="2">Cornerstone Title Services, LLC</option>
+      <option value="3">Cornerstone Title Services OH</option>
+      <option value="4">National TitleNet, LLC</option>
+      <option value="5">Title Pro Agency LLC</option>
+    </select>
+  </p>
+  <script type='text/javascript'>$('p#example_4 select').quickselect({mustMatch:true});</script>
+
+
   <h3>Plugin Files</h3>
   <ol>
     <li>
@@ -165,7 +182,7 @@
   <ol><li>jQuery >= 1.2.6 (Others are Untested)</li></ol>
   <h3>Options</h3>
   <ul>
-    <li><b>url:</b> if you want to load data via ajax, include a url. The query text will be appended as ?q=$value.</li>
+    <li><b>ajax:</b> if you want to load data via ajax, include a url. The query text will be appended as ?q=$value.</li>
     <li><b>data:</b> include data here if you aren’t using ajax.</li>
     <li><b>minChars:</b> the minimum number of characters before triggering the drop-down (and ajax, if applicable).</li>
     <li><b>delay:</b> milliseconds after typing that the results are re-evaluated. Make this longer if your ajax is bogging down.</li>
@@ -175,7 +192,7 @@
     <li><b>mustMatch:</b> if you’re not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additional_fields instantly get blank values.</li>
     <li><b>extraParams:</b> extra parameters for the ajax url.</li>
     <li><b>autoSelectFirst:</b> keep the first item selected as you type, and tab or enter will automatically fill in the rest from the top item.</li>
-    <li><b>selectOnly:</b> use if not using autoSelectFirst, use this to make the control automatically select the top item if there is only one item left.</li>
+    <li><b>selectSingleMatch:</b> use this if NOT using autoSelectFirst, to make the control automatically select the top item when there is only one matched item left.</li>
     <li><b>maxItemsToShow:</b> only show up to x number of items.</li>
     <li><b>additional_fields:</b> (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.</li>
     <li><b>autoFill:</b> use this if you want the text input to automatically try to finish what you’re typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you’re typing.</li>
@@ -191,6 +208,7 @@
   $(function(){
     $('#ExampleOne_LocalData').quickselect({
       maxItemsToShow:10,
+      autoSelectFirst:false,
       data:[
         "Aberdeen", "Ada", "Adamsville", ["Addyston", 'Addyston', 'closed'], "Adelphi", "Adena", "Adrian", "Akron",
         "Albany", "Alexandria", "Alger", "Alledonia", "Alliance", "Alpha", "Alvada",
@@ -396,16 +414,18 @@
     });
 
     $('#ExampleTwo_AjaxData').quickselect({
-      url:'ask.json',
+      ajax:'ask.json',
       match:'substring',
-      delay:1,
+      minChars:2,
+      delay:1000,
+      width:200,
       autoSelectFirst:false,
 			mustMatch:true,
       additional_fields:$('#other_thing_field'),
-      formatItem:function(data, index, total){return ""+index+"/"+total+". "+data[0]+" ("+data[1]+")"}
+      formatItem:function(data, index, total){return data[0]+" (extra: "+data[1]+")"}
     });
 
-    $("#ExampleThree_OptionsData").quickselect();
+    $("#ExampleThree_OptionsData").quickselect({autoFill:true, matchMethod:'startsWith'});
   });
   </script>
 </body>

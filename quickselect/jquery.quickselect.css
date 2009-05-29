@@ -1,11 +1,11 @@
-.auto_select_results {
+.quickselect_results {
 	padding: 0px;
 	border: 1px solid WindowFrame;
 	background-color: Window;
 	overflow: hidden;
 }
 
-.auto_select_results ul {
+.quickselect_results ul {
 	width: 100%;
 	list-style-position: outside;
 	list-style: none;
@@ -13,7 +13,7 @@
 	margin: 0;
 }
 
-.auto_select_results iframe {
+.quickselect_results iframe {
 	display:none;/*sorry for IE5*/
 	display/**/:block;/*sorry for IE5*/
 	position:absolute;
@@ -25,7 +25,7 @@
 	height:3000px;
 }
 
-.auto_select_results li {
+.quickselect_results li {
 	margin: 0px;
 	padding: 2px 5px;
 	cursor: pointer;
@@ -36,11 +36,11 @@
 	overflow: hidden;
 }
 
-.auto_select_loading {
+.quickselect_loading {
 	background : Window url('./indicator.gif') right center no-repeat;
 }
 
-.auto_select_selected {
+.quickselect_selected {
 	background-color: Highlight;
 	color: HighlightText;
 }
