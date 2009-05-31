@@ -363,6 +363,7 @@ function object(obj){
   	if(options.exactMatch === undefined){options.exactMatch = false;}
   	if(options.autoSelectFirst === undefined){options.autoSelectFirst = true;}
   	if(options.selectSingleMatch === undefined){options.selectSingleMatch = true;}
+  	if(options.additional_fields === undefined){options.additional_fields = $('nothing');}
   	options.maxVisibleItems = options.maxVisibleItems || -1;
   	if(options.autoFill === undefined || options.matchMethod != 'startsWith'){options.autoFill = false;} // if you're not using the startsWith match, it really doesn't help to autoFill.
   	options.width         = parseInt(options.width, 10) || 0;
@@ -370,7 +371,7 @@ function object(obj){
     // Make quickselects.
   	this.each(function(){
   		var input = this;
-      var my_options = $.shadowObject(options);
+      var my_options = object(options);
 
       if(input.tagName == 'INPUT'){
         // Text input: ready for QuickSelect-ing!
