@@ -48,10 +48,8 @@ function object(obj){
       var matchers = {
         quicksilver : function(q,data){
           q = q.toLowerCase();
-          console.log("matching '"+q+"' via quicksilver");
-          console.log(data);
     			AllItems.indexed[q] = [];
-          for(var i in data){
+          for(var i=0;i<data.length;i++){
             // get the label from the data item
             var label = getLabel(data[i]).toLowerCase();
             // Filter by match/no-match
@@ -68,10 +66,8 @@ function object(obj){
         },
         contains : function(q,data){
           q = q.toLowerCase();
-          console.log("matching '"+q+"' via contains");
-          console.log(data);
           AllItems.indexed[q] = [];
-          for(var i in data){
+          for(var i=0;i<data.length;i++){
             var label = getLabel(data[i]).toLowerCase();
             if(label.indexOf(q)>-1){AllItems.indexed[q].push(data[i]);}
           }
@@ -84,10 +80,8 @@ function object(obj){
         },
         startsWith : function(q,data){
           q = q.toLowerCase();
-          console.log("matching '"+q+"' via startsWith");
-          console.log(data);
           AllItems.indexed[q] = [];
-          for(var i in data){
+          for(var i=0;i<data.length;i++){
             var label = getLabel(data[i]).toLowerCase();
             if(label.indexOf(q)===0){AllItems.indexed[q].push(data[i]);}
           }
@@ -101,14 +95,14 @@ function object(obj){
       };
       var finders = {
         store : function(q,callback){
-          console.log("finding via store");
           callback(options.data);
         },
         ajax  : function(q,callback){
-          console.log("finding via ajax");
           var url = options.ajax + "?q=" + encodeURI(q);
         	for(var i in options.ajaxParams){
-        		url += "&" + i + "=" + encodeURI(options.ajaxParams[i]);
+        	  if(options.ajaxParams.hasOwnProperty(i)){
+        		  url += "&" + i + "=" + encodeURI(options.ajaxParams[i]);
+        		}
         	}
           $.getJSON(url, callback);
         }
@@ -123,8 +117,6 @@ function object(obj){
     		if(activeSelection < 0){activeSelection = 0;}
     		  else{if(activeSelection >= lis.size()){
     		    activeSelection = lis.size() - 1;}}
-
-        console.log("Moved selection to "+activeSelection+".");
 
     		lis.removeClass(options.selectedClass);
     		$(lis[activeSelection]).addClass(options.selectedClass);
@@ -152,7 +144,6 @@ function object(obj){
       	}
     	};
       var hideResultsNow = function(){
-        console.log("Hiding results now");
         if(timeout){clearTimeout(timeout);}
     		$input_element.removeClass(options.loadingClass);
     		if(results_list.is(":visible")){results_list.hide();}
@@ -188,8 +179,6 @@ function object(obj){
     		}
       };
       var repopulate_items = function(items){
-        console.log("Populating Items:");
-        console.log(items);
         // Clear the results to begin:
         results_list.empty();
       	var ul = document.createElement("ul");
@@ -217,11 +206,8 @@ function object(obj){
           // Set the class name, if specified
     			if(item.className){li.className = item.className;}
       		ul.appendChild(li);
-          console.log(li);
       		$(li).hover(hf, bf).click(cf);
         }
-
-        console.log("Added to list, no auto-fill, auto-select-first, or auto-select-single-match yet.");
 
         // Lastly, remove the loading class.
         $input_element.removeClass(options.loadingClass);
@@ -250,14 +236,11 @@ function object(obj){
       		height: results_list.height() - 2+'px'
       	}).show();}
       	results_list.show();
-      	console.log("Showing list:");
-      	console.log(results_list);
         var $lis = $('li', results_list);
         // Option autoSelectFirst, and Option selectSingleMatch (activate the first item if only item)
         if(options.autoSelectFirst || (options.selectSingleMatch && $lis.length == 1)){moveSelect($lis.get(0));}
       };
       var onChange = function(){
-        console.log("changed! Running matching...");
     		// ignore if non-consequence key is pressed (such as shift, ctrl, alt, escape, caps, pg up/down, home, end, arrows)
     		if(last_keyCode >= 9 && last_keyCode <= 45){return;}
         // compare with previous value / store new previous value
@@ -286,12 +269,10 @@ function object(obj){
         last_keyCode = e.keyCode;
         switch(e.keyCode){
           case 38: // up arrow - select prev item in the drop-down
-            console.log("Select previous item");
             e.preventDefault();
             moveSelect(-1);
             break;
           case 40: // down arrow - select next item in the drop-down
-            console.log("Select next item");
             e.preventDefault();
             if(!results_list.is(":visible")){
               show_results();
@@ -299,18 +280,15 @@ function object(obj){
             }else{moveSelect(1);}
             break;
           case 13: // return - select item and stay in field
-            console.log("Selecting current item and staying here");
             if(selectCurrent()){
               e.preventDefault();
               $input_element.select();
             }
             break;
           case 9:  // tab - select the currently selected, let the regular stuff happen
-            console.log("Selecting current item and moving on");
             selectCurrent();
             break;
           case 27: // Esc - deselect any active selection, hide the drop-down but stay in the field
-            console.log("Deselecting, hiding drop-down, staying in the field.");
             // Reset the active selection IF must be exactMatch and is not an exact match.
             if(activeSelection > -1 && options.exactMatch && $input_element.val()!=$('li', results_list).get(activeSelection).text()){activeSelection = -1;}
         		$('li', results_list).removeClass(options.selectedClass);
@@ -318,17 +296,14 @@ function object(obj){
             e.preventDefault();
             break;
           default:
-            console.log("reset timeout");
             if(timeout){clearTimeout(timeout);}
             timeout = setTimeout(onChange, options.delay);
             break;
         }
-      })
-      .focus(function(){
+      }).focus(function(){
     		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
     		hasFocus = true;
-    	})
-    	.blur(function(e){
+    	}).blur(function(e){
         if(clickedLI){
           if(activeSelection>-1){selectCurrent();}
       		// track whether the field has focus
@@ -392,7 +367,6 @@ function object(obj){
         // Collect the data from the select/options, remove them and create an input box instead.
   		  my_options.data = [];
   		  $('option', input).each(function(i,option){
-  		    console.log(option);
   		    my_options.data.push({label : $(option).text(), values : [option.value, option.value], className : option.className});
   		  });
 
