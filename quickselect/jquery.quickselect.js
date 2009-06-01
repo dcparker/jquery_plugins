@@ -1,4 +1,6 @@
 // Credit to Anders Retterås for adding functionality preventing onblur event to fire on text input when clicking on scrollbars in MSIE / Opera.
+// Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with no options and then Compact.
+// Packed version created at http://jsutility.pjoneil.net/ by running Compress on the Minified version.
 
 function object(obj){
   var s = function(){};
@@ -10,26 +12,28 @@ function object(obj){
   // The job of the QuickSelect object is to encapsulate all the state of a select control and manipulate the DOM and interface events.
   var QuickSelect = function($input_element, options){
     $input_element = $($input_element);
-    var self = this;
 
     // Save the state of the control
-      var AllItems = {indexed:{}}; // hash of "index" -> [items], where index is the query that retrieves or filters the results.
-      var clickedLI = true; // just a state variable for IE scrollbars.
-      var activeSelection = -1;
-      var hasFocus = false;
-      var last_keyCode;
-      var previous_value;
-      var timeout;
-      var ie_stupidity = false;
+      // AllItems: hash of "index" -> [items], where index is the query that retrieves or filters the results.
+      // clickedLI: just a state variable for IE scrollbars.
+      var AllItems = {},
+          clickedLI = true,
+          activeSelection = -1,
+          hasFocus = false,
+          last_keyCode,
+          previous_value,
+          timeout,
+          ie_stupidity = false,
+          results_list,
+          results_mask;
       if(/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ //test for MSIE x.x;
-        var ieversion = Number(RegExp.$1); // capture x.x portion and store as a number
-        if(ieversion <= 7){ie_stupidity=true;}
+        if(Number(RegExp.$1) <= 7){ie_stupidity=true;}
       }
 
     // Create the list DOM
-      var results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute"></div>').hide();
+      results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute"></div>').hide();
       // Supposedly if we position an iframe behind the results list, before we position the results list, it will hide select elements in IE.
-      var results_mask = $('<iframe />');
+      results_mask = $('<iframe />');
       results_mask.css({border:'none',position:'absolute'});
     	if(options.width>0){
     	  results_list.css("width", options.width);
@@ -48,30 +52,25 @@ function object(obj){
       var matchers = {
         quicksilver : function(q,data){
           q = q.toLowerCase();
-    			AllItems.indexed[q] = [];
+    			AllItems[q] = [];
           for(var i=0;i<data.length;i++){
-            // get the label from the data item
-            var label = getLabel(data[i]).toLowerCase();
             // Filter by match/no-match
-            if(label.score(q)>0){AllItems.indexed[q].push(data[i]);}
+            if(getLabel(data[i]).toLowerCase().score(q)>0){AllItems[q].push(data[i]);}
     			}
           // Sort by match relevance
-    			return AllItems.indexed[q].sort(function(a,b){
-            a = getLabel(a);
-            b = getLabel(b);
-        	  var as = a.toLowerCase().score(q);
-            var bs = b.toLowerCase().score(q);
-            return(as > bs ? -1 : (bs > as ? 1 : 0));
+    			return AllItems[q].sort(function(a,b){
+        	  a = getLabel(a).toLowerCase().score(q);
+            b = getLabel(b).toLowerCase().score(q);
+            return(a > b ? -1 : (b > a ? 1 : 0));
           });
         },
         contains : function(q,data){
           q = q.toLowerCase();
-          AllItems.indexed[q] = [];
+          AllItems[q] = [];
           for(var i=0;i<data.length;i++){
-            var label = getLabel(data[i]).toLowerCase();
-            if(label.indexOf(q)>-1){AllItems.indexed[q].push(data[i]);}
+            if(getLabel(data[i]).toLowerCase().indexOf(q)>-1){AllItems[q].push(data[i]);}
           }
-    			return AllItems.indexed[q].sort(function(a,b){
+    			return AllItems[q].sort(function(a,b){
             a = getLabel(a).toLowerCase();
             b = getLabel(b).toLowerCase();
             // order by proximity of match to beginning of the label, secondly by alphabetic order
@@ -80,12 +79,11 @@ function object(obj){
         },
         startsWith : function(q,data){
           q = q.toLowerCase();
-          AllItems.indexed[q] = [];
+          AllItems[q] = [];
           for(var i=0;i<data.length;i++){
-            var label = getLabel(data[i]).toLowerCase();
-            if(label.indexOf(q)===0){AllItems.indexed[q].push(data[i]);}
+            if(getLabel(data[i]).toLowerCase().indexOf(q)===0){AllItems[q].push(data[i]);}
           }
-    			return AllItems.indexed[q].sort(function(a,b){
+    			return AllItems[q].sort(function(a,b){
             a = getLabel(a).toLowerCase();
             b = getLabel(b).toLowerCase();
             // alphabetic order of labels
@@ -125,9 +123,9 @@ function object(obj){
           // 1. Fill in the value (keep the case the user has typed)
       		$input_element.val(previous_value + $(lis[activeSelection]).text().substring(previous_value.length));
       		// 2. SELECT the portion of the value not typed by the user (so the next character will erase if they continue typing)
-            var sel_start = previous_value.length;
-            var sel_end = $input_element.val().length;
-            var field = $input_element.get(0);
+            var sel_start = previous_value.length,
+                sel_end = $input_element.val().length,
+                field = $input_element.get(0);
           	if(field.createTextRange){
           		var selRange = field.createTextRange();
           		selRange.collapse(true);
@@ -154,12 +152,12 @@ function object(obj){
     			li = document.createElement("li");
     			li.item = '';
     		}
-        var label = getLabel(li.item);
+        var label = getLabel(li.item),
+    		    values = getValues(li.item);
     		$input_element.lastSelected = label;
     		$input_element.val(label); // Set the visible value
     		previous_value = label;
     		results_list.empty(); // clear the results list
-    		var values = getValues(li.item);
         options.additional_fields.each(function(i,input){input.value = values[i+1];}); // set the additional fields' values
         if(!from_hide_now_function){hideResultsNow();} // hide the results when something is selected
     		if(options.onItemSelect){setTimeout(function(){ options.onItemSelect(li); }, 1);} // run the user callback, if set
@@ -181,23 +179,23 @@ function object(obj){
       var repopulate_items = function(items){
         // Clear the results to begin:
         results_list.empty();
-      	var ul = document.createElement("ul");
-    		results_list.append(ul);
         // If the field no longer has focus or if there are no matches, forget it.
     		if(!hasFocus || items === null || items.length === 0){return hideResultsNow();}
     		
-      	var total_count = items.length;
+      	var ul = document.createElement("ul"),
+      	    total_count = items.length,
+        // hover functions
+            hf = function(){ moveSelect(this); },
+            bf = function(){},
+            cf = function(e){ e.preventDefault(); e.stopPropagation(); selectItem(this); };
+    		results_list.append(ul);
       	// limited results to a max number
       	if(options.maxVisibleItems > 0 && options.maxVisibleItems < total_count){total_count = options.maxVisibleItems;}
 
-        // hover functions
-        var hf = function(){ moveSelect(this); };
-        var bf = function(){};
-        var cf = function(e){ e.preventDefault(); e.stopPropagation(); selectItem(this); };
         // Add each item:
         for(var i=0; i<total_count; i++){
-          var item = items[i];
-      		var li = document.createElement("li");
+          var item = items[i],
+      		    li = document.createElement("li");
           results_list.append(li);
     			$(li).text(options.formatItem ? options.formatItem(item, i, total_count) : getLabel(item));
 
@@ -219,10 +217,11 @@ function object(obj){
         });
       };
       var show_results = function(){
-      	// get the position of the input field before showing the results_list (in case the DOM is shifted)
-      	var pos = $input_element.offset();
-      	// either use the specified width, or autocalculate based on form element
-      	var iWidth = (options.width > 0) ? options.width : $input_element.width();
+      	// pos: get the position of the input field before showing the results_list (in case the DOM is shifted)
+      	// iWidth: either use the specified width, or autocalculate based on form element
+      	var pos = $input_element.offset(),
+      	    iWidth = (options.width > 0 ? options.width : $input_element.width()),
+            $lis = $('li', results_list);
       	// reposition
       	results_list.css({
       		width: parseInt(iWidth,10) + "px",
@@ -236,7 +235,6 @@ function object(obj){
       		height: results_list.height() - 2+'px'
       	}).show();}
       	results_list.show();
-        var $lis = $('li', results_list);
         // Option autoSelectFirst, and Option selectSingleMatch (activate the first item if only item)
         if(options.autoSelectFirst || (options.selectSingleMatch && $lis.length == 1)){moveSelect($lis.get(0));}
       };
@@ -345,8 +343,8 @@ function object(obj){
     
     // Make quickselects.
   	this.each(function(){
-  		var input = this;
-      var my_options = object(options);
+  		var input = this,
+          my_options = object(options);
 
       if(input.tagName == 'INPUT'){
         // Text input: ready for QuickSelect-ing!
@@ -357,12 +355,12 @@ function object(obj){
       	my_options.delay = my_options.delay || 10; // for selects, we know we're not doing ajax, so we might as well speed up
 
         // Record the html stuff from the select
-        var name = input.name;
-        var id = input.id;
-        var className = input.className;
-        var accesskey = $(input).attr('accesskey');
-        var tabindex = $(input).attr('tabindex');
-        var selected_option = $("option:selected", input).get(0);
+        var name = input.name,
+            id = input.id,
+            className = input.className,
+            accesskey = $(input).attr('accesskey'),
+            tabindex = $(input).attr('tabindex'),
+            selected_option = $("option:selected", input).get(0);
 
         // Collect the data from the select/options, remove them and create an input box instead.
   		  my_options.data = [];
