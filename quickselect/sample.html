@@ -5,7 +5,7 @@
   <title>jQuery : QuickSelect</title>
   <script type="text/javascript" src="jquery-1.2.6.pack.js"></script>
   <script type='text/javascript' src='quicksilver.js'></script>
-  <script type='text/javascript' src='jquery.quickselect.ypack.js'></script>
+  <script type='text/javascript' src='jquery.quickselect.js'></script>
   <link rel="stylesheet" type="text/css" href="jquery.quickselect.css" />
 </head>
 
@@ -38,31 +38,50 @@
   <!-- Example 2: Ajax Data  -->
       <h2>Ajax Data</h2>
       <p>
-        QuickSelect input box with data from url formatted as JSON ('ask.json' in this case).<br />
-        Data from the first field will dictate the second fields data based upon the json provided.<br />
-				In an actual implementation, the data returned should correspond to what you've typed<br />
-				(the request adds a query-string "?q=&lt;what-you-typed&gt;").<br />
-				In this example, the json data is just a static file.<br />
-        City: <input type="text" id="ExampleTwo_AjaxData" value="" style="width: 200px;" />
-        <input id='other_thing_field' type='text' name='other_thing' disabled='true' />
+        QuickSelect input box with data from url formatted as JSON ('zips_starting_with_49.json' in this case).<br />
+        Data from the first field will dictate the other fields data based upon the json provided.<br />
+        In an actual implementation, the data returned should correspond to what you've typed<br />
+        (the request adds a query-string "?q=&lt;what-you-typed&gt;").<br />
+        In this example, the json data is just a static file.<br />
+        
+        
+        <h3>Enter a zip beginning with 49___</h3>
+        <label>Zip</label>
+        <input id="zip" type="text" />
+        <h3>Witness the glory</h3>
+        <label>City</label>
+        <input id='city' type="text" />
+        <label>State</label>
+        <input id="state" type="text" />
+        <script type="text/javascript">
+          $('#zip').quickselect({
+            ajax:'zips_starting_with_49.json',
+            match:'substring',
+            autoSelectFirst:false,
+            mustMatch:true,
+            additional_fields:[$('#city'), $('#state')],
+            formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+          });
+        </script>
+        <pre style='background-color: #DDD; border: 1px dotted black'>
+          <code>
+            &lt;label>Zip&lt;/label&gt;   &lt;input type="text" id="zip" /&gt;
+            &lt;label>City&lt;/label&gt;  &lt;input type="text" id="city" /&gt;
+            &lt;label>State&lt;/label&gt; &lt;input type="text" id="state" /&gt;
+            
+            &lt;script type="text/javascript"&gt;
+              $('#zip').quickselect({
+                ajax:'zips_starting_with_49.json',    /* call to url with json formatted array of data */
+                match:'substring',
+                autoSelectFirst:false,
+                mustMatch:true,
+                additional_fields:[$('#city'), $('#state')],
+                formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+              });
+            &lt;/script&gt;
+          </code>
+        </pre>
       </p>
-<pre style='background-color: #DDD; border: 1px dotted black'>
-  <code>
-    &lt;input type="text" id="ExampleTwo_AjaxData" value="" style="width: 200px;" /&gt;
-    &lt;input id='other_thing_field' type='text' name='other_thing' /&gt;
-    
-    &lt;script&gt;
-      $('#ExampleTwo_AjaxData').quickselect({
-        ajax:'ask.json',
-        match:'substring',
-        autoSelectFirst:false,
-        mustMatch:true,
-        additional_fields:$('#other_thing_field'),
-        formatItem:function(data, index, total){return ''+index+'/'+total+'. '+data[0]+" ("+data[1]+")"}
-      });
-    &lt;/script&gt;
-  </code>
-</pre>
 
 
 
