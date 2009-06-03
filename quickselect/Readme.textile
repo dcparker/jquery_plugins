@@ -38,7 +38,7 @@ Two modes for data: Data, and Ajax.
 * data: Include the array of selectable options here, either a flat array: "['option 1', 'option 2']" or expanded with item options: "[{label : 'option 1', value : 'value 1', className : 'type_A'}, {label : 'option 2', value : 'value 2', className : 'type_B'}]".
 * ajax: if you want to load data via ajax, put the ajax url here. The query text will be appended as ?q=$value.
 * ajaxParams: extra parameters for the ajax url if necessary. These will be encoded into a query string, along with the query ('q') value.
-* additional_fields: (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.
+* additional_fields: (element or array of elements to be updated) one or more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.
 * delay: number of milliseconds after typing that the results are re-evaluated. Make this longer if your ajax is bogging down.
 * minChars: the minimum number of characters before triggering the drop-down (and ajax, if applicable).
 * matchCase: true/false - specify that the drop-down should be case-sensitive.
