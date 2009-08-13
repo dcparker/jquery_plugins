@@ -214,7 +214,6 @@ String.prototype.score = function(abbr){
     // var proportion = Math.sqrt(abbr.length) / Math.sqrt(this.length);
     var proportion = abbr.length / this.length;
     var score_per_character = potential_score * proportion / abbr.length;
-    console.log(score_per_character);
 
     // Now, score each match path
     var paths = match_tree.paths();
@@ -227,8 +226,6 @@ String.prototype.score = function(abbr){
       score = 0;
       path.match_infos=[];
       path.each(function(){
-        // this.count = this.parent.next_matches.length;
-        // this.count_after = this.parent.next_matches.count_how(function(){return this.position > this.parent.position;});
         score += 1;
         multiplier = 1;
         if(this.match_info.includes('outOfOrder'))
@@ -243,19 +240,12 @@ String.prototype.score = function(abbr){
       if(path[0].match_info.includes('acronym') && !path[0].match_info.includes('firstChar'))
         score += (options.firstChar * 3/4);
       scores.push(score);
-      // console.log(path.match_infos);
     });
-    // console.log("Paths: "+plen);
-    // console.log("Potential Score: "+potential_score);
-    // console.log("Proportion: "+proportion);
-    // console.log(scores);
 
     // Last, return the proportion of the best score to the base potential score.
-    // console.log(match_tree);
     var best_path_i = scores.highest_i();
     var best_path = paths[best_path_i];
 
-    console.log(best_path.match_infos);
     var highest = scores[best_path_i];
     return(highest===0 ? 0 : highest/potential_score);
 };
