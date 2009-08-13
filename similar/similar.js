@@ -157,7 +157,7 @@ var MatchTree = function(parent, string, abbr, positions){
 
 String.prototype.score = function(abbr){
   // Cheat: if exact match, go ahead and just immediately return the highest score possible
-  if(this===abbr)return 1.0;
+  if(this==abbr)return 1.0;
   
   // Set up the scoring options. These are all adding to or subtracting from a regular fact-of-match = 1
     var options = String.scoring_options || {};
