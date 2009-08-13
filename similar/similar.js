@@ -174,7 +174,13 @@ String.prototype.score = function(abbr){
     // when a query character is missing from the string
     if(!options.missingMatch) options.missingMatch = -5;
     // when a query character matches in the string, but is not in order with the rest of the string
-    if(!options.outOfOrder) options.outOfOrder = -0.95;
+    if(!options.outOfOrder) options.outOfOrder = {
+      // Subtracts this proportionally based on the ACTUAL point value of each character in the abbreviation,
+      // and then reduces the other boosts by the multiplier value. That way we're SURE it's always positively
+      // valuable to include a character even if it's out of place.
+      score: -0.95, // subtracts most of the value of having the character in there
+      multiplier: 0.1 // reduces the effect of the other boosts by quite a bit - although if there are several boosts, the score will still amount to at least something
+    };
 
     // Other ideas for weights:
     //   +bump related to the number of matching characters there are in the string that follow the last match
@@ -205,14 +211,17 @@ String.prototype.score = function(abbr){
     
     // Thirdly, give scores to each matched character, proportional to the potential score for each bonus type.
     // proportion of the square roots of the lengths?
-    var proportion = Math.sqrt(abbr.length) / Math.sqrt(this.length);
+    // var proportion = Math.sqrt(abbr.length) / Math.sqrt(this.length);
+    var proportion = abbr.length / this.length;
+    var score_per_character = potential_score * proportion / abbr.length;
+    console.log(score_per_character);
 
     // Now, score each match path
     var paths = match_tree.paths();
     var path,plen=paths.length;
 
     // Then, calculate the score for each path
-    var i,j,match_infos,score,scores=[];
+    var i,j,match_infos,score,scores=[],multiplier;
     paths.each(function(){
       path = this;
       score = 0;
@@ -221,11 +230,18 @@ String.prototype.score = function(abbr){
         // this.count = this.parent.next_matches.length;
         // this.count_after = this.parent.next_matches.count_how(function(){return this.position > this.parent.position;});
         score += 1;
+        multiplier = 1;
+        if(this.match_info.includes('outOfOrder'))
+          multiplier = options.outOfOrder.multiplier;
         this.match_info.each(function(){
-          if(options[this]) score += options[this];
+          if(options[this])
+            score += ( this=='outOfOrder' ? (options.outOfOrder.score * (score_per_character-1)) : (options[this] * multiplier) );
         });
         path.match_infos.push(this.match_info, score);
       });
+      // Extra: first-abbr-character-is-on-acronym boost - 2/3 of firstChar boost
+      if(path[0].match_info.includes('acronym') && !path[0].match_info.includes('firstChar'))
+        score += (options.firstChar * 3/4);
       scores.push(score);
       // console.log(path.match_infos);
     });
@@ -236,8 +252,11 @@ String.prototype.score = function(abbr){
 
     // Last, return the proportion of the best score to the base potential score.
     // console.log(match_tree);
-    // console.log(paths[scores.highest_i()].match_infos);
-    var highest = scores.highest();
+    var best_path_i = scores.highest_i();
+    var best_path = paths[best_path_i];
+
+    console.log(best_path.match_infos);
+    var highest = scores[best_path_i];
     return(highest===0 ? 0 : highest/potential_score);
 };
 
