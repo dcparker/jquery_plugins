@@ -12,6 +12,7 @@ h4. Installation
 # Include the jquery library in your project.
 # Then you'll need the following files for this plugin:
 #* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
+#* OR "similar.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fsimilar%2Fsimilar.js?raw=true
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
 #* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.css?raw=true
 
@@ -25,7 +26,7 @@ The next mode you might use is ajax. $('input#city_name_field').quickselect({url
 
 Try this mode to make a richer application. Same as the ajax, but include more fields in your json data: $('input#city_name_field').quickselect({url:'/ajax/cities.json', additionalFields:$('input#zipcode_field')}); In your json data, instead of just spitting out an array of city names, make each array element be a two-element array, the first element being the city name (for the field you're typing in), and the second being the corresponding zip code for that city. That way when you select a city, it'll automatically populate the zipcode too! This also works really well for when you need to select a human-readable label but have the actual value be a resource id. Just make a visible text input into a quickselect but in your additionalFields mention a hidden field, and in your data just include the label and the id.
 
-Note, if you include quicksilver.js, quickselect will automatically default to using quicksilver-like similarity matching.
+Note, if you include quicksilver.js or similar.js, quickselect will automatically default to using their pretty smart similarity matching methods.
 
 * Sample simple option selection: $('input[type=text]#sample1').quickselect({data : ['Option 1', 'Option 2', 'Option 3']})
 * Identical Sample, using data as second argument instead of part of options: $('input[type=text]#sample1').quickselect({}, ['Option 1', 'Option 2', 'Option 3'])
@@ -42,7 +43,7 @@ Two modes for data: Data, and Ajax.
 * delay: number of milliseconds after typing that the results are re-evaluated. Make this longer if your ajax is bogging down.
 * minChars: the minimum number of characters before triggering the drop-down (and ajax, if applicable).
 * matchCase: true/false - specify that the drop-down should be case-sensitive.
-* matchMethod: One of 'first_quicksilver', 'quicksilver', 'contains', or 'startsWith'. If not specified, 'contains' is default, unless quicksilver.js is auto-detected, then 'first_quicksilver' is default, which matches that the first letter of query and result are equal (case-insensitive), and quicksilver matching on the rest of the query.
+* matchMethod: One of 'quicksilver', 'contains', or 'startsWith'. If not specified, 'contains' is default, unless quicksilver.js or similar.js is auto-detected (String.prototype.score() is defined), then 'quicksilver' is default, which matches that the first letter of query and result are equal (case-insensitive), and quicksilver matching on the rest of the query.
 * autoSelectFirst: (default: true) always have the first matched item selected until the selection is manually changed; tab or enter will choose the top selection.
 * selectSingleMatch: use this if NOT using autoSelectFirst, to make the control automatically select the top item when there is only one matched item left.
 * exactMatch: use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additionalFields instantly get blank values.
