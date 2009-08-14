@@ -1,5 +1,5 @@
 // Credit to Anders Retteras for adding functionality preventing onblur event to fire on text input when clicking on scrollbars in MSIE / Opera.
-// Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with no options and then Compact.
+// Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with no options and then Compact.
 // Packed version created at http://jsutility.pjoneil.net/ by running Compress on the Minified version.
 
 function object(obj){
@@ -11,13 +11,15 @@ function object(obj){
 (function($){
   // The job of the QuickSelect object is to encapsulate all the state of a select control and manipulate the DOM and interface events.
   var QuickSelect = function($input_element, options){
+    var self = this;
     $input_element = $($input_element);
+    self.options = options;
 
     // Save the state of the control
       // AllItems: hash of "index" -> [items], where index is the query that retrieves or filters the results.
       // clickedLI: just a state variable for IE scrollbars.
-      var AllItems = {},
-          clickedLI = true,
+      self.AllItems = {};
+      var clickedLI = false,
           activeSelection = -1,
           hasFocus = false,
           last_keyCode,
@@ -43,67 +45,11 @@ function object(obj){
       if(ie_stupidity){$('body').append(results_mask);}
 
     // Set up all of the methods
-      var getLabel = function(item){
+      self.getLabel = function(item){
         return item.label || (typeof(item)==='string' ? item : item[0]) || ''; // hash:item.label; string:item; array:item[0]
       };
       var getValues = function(item){
         return item.values || (item.value ? [item.value] : (typeof(item)==='string' ? [item] : item)) || []; // hash:item.values || item.value; string:item; array:item[1..end]
-      };
-      var matchers = {
-        quicksilver : function(q,data){
-          q = q.toLowerCase();
-    			AllItems[q] = [];
-          for(var i=0;i<data.length;i++){
-            // Filter by match/no-match
-            if(getLabel(data[i]).toLowerCase().score(q)>0){AllItems[q].push(data[i]);}
-    			}
-          // Sort by match relevance
-    			return AllItems[q].sort(function(a,b){
-        	  a = getLabel(a).toLowerCase().score(q);
-            b = getLabel(b).toLowerCase().score(q);
-            return(a > b ? -1 : (b > a ? 1 : 0));
-          });
-        },
-        contains : function(q,data){
-          q = q.toLowerCase();
-          AllItems[q] = [];
-          for(var i=0;i<data.length;i++){
-            if(getLabel(data[i]).toLowerCase().indexOf(q)>-1){AllItems[q].push(data[i]);}
-          }
-    			return AllItems[q].sort(function(a,b){
-            a = getLabel(a).toLowerCase();
-            b = getLabel(b).toLowerCase();
-            // order by proximity of match to beginning of the label, secondly by alphabetic order
-            return(a.indexOf(q) > b.indexOf(q) ? -1 : (a.indexOf(q) < b.indexOf(q) ? 1 : (a > b ? -1 : (b > a ? 1 : 0))));
-          });
-        },
-        startsWith : function(q,data){
-          q = q.toLowerCase();
-          AllItems[q] = [];
-          for(var i=0;i<data.length;i++){
-            if(getLabel(data[i]).toLowerCase().indexOf(q)===0){AllItems[q].push(data[i]);}
-          }
-    			return AllItems[q].sort(function(a,b){
-            a = getLabel(a).toLowerCase();
-            b = getLabel(b).toLowerCase();
-            // alphabetic order of labels
-            return(a > b ? -1 : (b > a ? 1 : 0));
-          });
-        }
-      };
-      var finders = {
-        store : function(q,callback){
-          callback(options.data);
-        },
-        ajax  : function(q,callback){
-          var url = options.ajax + "?q=" + encodeURI(q);
-        	for(var i in options.ajaxParams){
-        	  if(options.ajaxParams.hasOwnProperty(i)){
-        		  url += "&" + i + "=" + encodeURI(options.ajaxParams[i]);
-        		}
-        	}
-          $.getJSON(url, callback);
-        }
       };
      	var moveSelect = function(step_or_li){
     		var lis = $('li', results_list);
@@ -119,7 +65,7 @@ function object(obj){
     		lis.removeClass(options.selectedClass);
     		$(lis[activeSelection]).addClass(options.selectedClass);
 
-        if(options.autoFill && this.last_keyCode != 8){ // autoFill value, if option is set and the last user key pressed wasn't backspace
+        if(options.autoFill && self.last_keyCode != 8){ // autoFill value, if option is set and the last user key pressed wasn't backspace
           // 1. Fill in the value (keep the case the user has typed)
       		$input_element.val(previous_value + $(lis[activeSelection]).text().substring(previous_value.length));
       		// 2. SELECT the portion of the value not typed by the user (so the next character will erase if they continue typing)
@@ -147,12 +93,12 @@ function object(obj){
     		if(results_list.is(":visible")){results_list.hide();}
     		if(results_mask.is(":visible")){results_mask.hide();}
       };
-      var selectItem = function(li, from_hide_now_function){
+      self.selectItem = function(li, from_hide_now_function){
     		if(!li){
     			li = document.createElement("li");
     			li.item = '';
     		}
-        var label = getLabel(li.item),
+        var label = self.getLabel(li.item),
     		    values = getValues(li.item);
     		$input_element.lastSelected = label;
     		$input_element.val(label); // Set the visible value
@@ -166,12 +112,12 @@ function object(obj){
       var selectCurrent = function(){
         var li = $("li."+options.selectedClass, results_list).get(0);
     		if(li){
-    			return selectItem(li);
+    			return self.selectItem(li);
     		} else {
           // No current selection - blank the fields if options.exactMatch and current value isn't valid.
           if(options.exactMatch){
             $input_element.val('');
-            options.additionalFields.each(function(i,input){$(input).val('');});
+            $(options.additionalFields).each(function(i,input){$(input).val('');});
           }
           return false;
     		}
@@ -187,7 +133,7 @@ function object(obj){
         // hover functions
             hf = function(){ moveSelect(this); },
             bf = function(){},
-            cf = function(e){ e.preventDefault(); e.stopPropagation(); selectItem(this); };
+            cf = function(e){ e.preventDefault(); e.stopPropagation(); self.selectItem(this); };
     		results_list.append(ul);
       	// limited results to a max number
       	if(options.maxVisibleItems > 0 && options.maxVisibleItems < total_count){total_count = options.maxVisibleItems;}
@@ -197,7 +143,7 @@ function object(obj){
           var item = items[i],
       		    li = document.createElement("li");
           results_list.append(li);
-    			$(li).text(options.formatItem ? options.formatItem(item, i, total_count) : getLabel(item));
+    			$(li).text(options.formatItem ? options.formatItem(item, i, total_count) : self.getLabel(item));
 
           // Save the extra values (if any) to the li
     			li.item = item;
@@ -211,10 +157,10 @@ function object(obj){
         $input_element.removeClass(options.loadingClass);
       };
       var repopulate = function(q,callback){
-        finders[!options.data ? 'ajax' : 'store'](q,function(data){
-          repopulate_items(matchers[options.matchMethod](q,data));
+        QuickSelect.finders[!options.data ? 'ajax' : 'store'].apply(self,[q,function(data){
+          repopulate_items(QuickSelect.matchers[options.matchMethod].apply(self,[q,data]));
           callback();
-        });
+        }]);
       };
       var show_results = function(){
       	// pos: get the position of the input field before showing the results_list (in case the DOM is shifted)
@@ -252,7 +198,7 @@ function object(obj){
           repopulate(q,show_results);
     		} else { // if too short, hide the list.
     		  if(q.length === 0 && (options.onBlank ? options.onBlank() : true)){ // onBlank callback
-    		    options.additionalFields.each(function(i,input){input.value='';});
+    		    $(options.additionalFields).each(function(i,input){input.value='';});
     		  }
     			$input_element.removeClass(options.loadingClass);
     			results_list.hide();
@@ -262,7 +208,7 @@ function object(obj){
       
     // Set up the interface events
       // Mark that actual item was clicked if clicked item was NOT a DIV, so the focus doesn't leave the items.
-      results_list.mousedown(function(e){clickedLI=e.srcElement.tagName!='DIV';});
+      results_list.mousedown(function(e){if(e.srcElement)clickedLI=e.srcElement.tagName!='DIV';});
       $input_element.keydown(function(e){
         last_keyCode = e.keyCode;
         switch(e.keyCode){
@@ -283,12 +229,12 @@ function object(obj){
               $input_element.select();
             }
             break;
-          case 9:  // tab - select the currently selected, let the regular stuff happen
-            selectCurrent();
+          case 9:  // tab - select the currently selected, let the onblur happen
+            // selectCurrent();
             break;
           case 27: // Esc - deselect any active selection, hide the drop-down but stay in the field
             // Reset the active selection IF must be exactMatch and is not an exact match.
-            if(activeSelection > -1 && options.exactMatch && $input_element.val()!=$('li', results_list).get(activeSelection).text()){activeSelection = -1;}
+            if(activeSelection > -1 && options.exactMatch && $input_element.val()!=$($('li', results_list).get(activeSelection)).text()){activeSelection = -1;}
         		$('li', results_list).removeClass(options.selectedClass);
          	  hideResultsNow();
             e.preventDefault();
@@ -302,20 +248,89 @@ function object(obj){
     		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
     		hasFocus = true;
     	}).blur(function(e){
-        if(clickedLI){
-          if(activeSelection>-1){selectCurrent();}
-      		// track whether the field has focus
-      		hasFocus = false;
-      		if(timeout){clearTimeout(timeout);}
-      		timeout = setTimeout(function(){
-      		  hideResultsNow();
-            // Select null element, IF options.exactMatch and there is no selection.
-            if(options.exactMatch && $input_element.val() != $input_element.lastSelected){selectItem(null,true);}
-      		}, 200);
-        }else{
-          e.srcElement.focus();
-        }
+        if(activeSelection>-1){selectCurrent();}
+    		hasFocus = false;
+    		if(timeout){clearTimeout(timeout);}
+    		timeout = setTimeout(function(){
+    		  hideResultsNow();
+          // Select null element, IF options.exactMatch and there is no selection.
+          if(options.exactMatch && $input_element.val() != $input_element.lastSelected){self.selectItem(null,true);}
+    		}, 200);
     	});
+  };
+
+  QuickSelect.matchers = {
+    quicksilver : function(q,data){
+			var match_query, match_label;
+      match_query = (this.options.matchCase ? q : q.toLowerCase());
+			this.AllItems[match_query] = [];
+      for(var i=0;i<data.length;i++){
+        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
+        // Filter by match/no-match
+        if(match_label.score(match_query)>0){this.AllItems[match_query].push(data[i]);}
+			}
+      // Sort by match relevance
+			return this.AllItems[match_query].sort(function(a,b){
+        // Normalize a & b
+        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
+        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        // Score a & b
+    	  a = a.score(match_query);
+        b = b.score(match_query);
+        // Compare a & b by score
+        return(a > b ? -1 : (b > a ? 1 : 0));
+      });
+    },
+    contains : function(q,data){
+			var match_query, match_label;
+      match_query = (this.options.matchCase ? q : q.toLowerCase());
+      this.AllItems[match_query] = [];
+      for(var i=0;i<data.length;i++){
+        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
+        if(match_label.indexOf(match_query)>-1){this.AllItems[match_query].push(data[i]);}
+      }
+			return this.AllItems[match_query].sort(function(a,b){
+        // Normalize a & b
+        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
+        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        // Get proximities
+        var a_proximity = a.indexOf(match_query);
+        var b_proximity = b.indexOf(match_query);
+        // Compare a & b by match proximity to beginning of label, secondly alphabetically
+        return(a_proximity > b_proximity ? -1 : (a_proximity < b_proximity ? 1 : (a > b ? -1 : (b > a ? 1 : 0))));
+      });
+    },
+    startsWith : function(q,data){
+			var match_query, match_label;
+      match_query = (this.options.matchCase ? q : q.toLowerCase());
+      this.AllItems[match_query] = [];
+      for(var i=0;i<data.length;i++){
+        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
+        if(match_label.indexOf(match_query)===0){this.AllItems[match_query].push(data[i]);}
+      }
+			return this.AllItems[match_query].sort(function(a,b){
+        // Normalize a & b
+        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
+        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        // Compare a & b alphabetically
+        return(a > b ? -1 : (b > a ? 1 : 0));
+      });
+    }
+  };
+
+  QuickSelect.finders = {
+    store : function(q,callback){
+      callback(this.options.data);
+    },
+    ajax  : function(q,callback){
+      var url = this.options.ajax + "?q=" + encodeURI(q);
+    	for(var i in this.options.ajaxParams){
+    	  if(this.options.ajaxParams.hasOwnProperty(i)){
+    		  url += "&" + i + "=" + encodeURI(this.options.ajaxParams[i]);
+    		}
+    	}
+      $.getJSON(url, callback);
+    }
   };
 
   $.fn.quickselect = function(options, data){
@@ -324,14 +339,16 @@ function object(obj){
   	options.data          = (typeof(options.data) === "object" && options.data.constructor == Array) ? options.data : undefined;
   	options.ajaxParams    = options.ajaxParams || {};
   	options.delay         = options.delay || 400;
+  	if(!options.delay) options.delay = (!options.ajax ? 400 : 10);
   	options.minChars      = options.minChars || 1;
   	options.cssFlavor     = options.cssFlavor || 'quickselect';
   	options.inputClass    = options.inputClass || options.cssFlavor+"_input";
   	options.loadingClass  = options.loadingClass || options.cssFlavor+"_loading";
   	options.resultsClass  = options.resultsClass || options.cssFlavor+"_results";
   	options.selectedClass = options.selectedClass || options.cssFlavor+"_selected";
+    options.finderFunction = options.finderFunction || QuickSelect.finders[!options.data ? 'ajax' : 'store'];
     // matchMethod: (quicksilver | contains | startsWith). Defaults to 'quicksilver' if quicksilver.js is loaded / 'contains' otherwise.
-    options.matchMethod   = options.matchMethod || ((typeof ''.score === 'function') && 'l'.score('l') == 1 ? 'quicksilver' : 'contains');
+    options.matchMethod   = options.matchMethod || (typeof(''.score) === 'function' && 'l'.score('l') == 1 ? 'quicksilver' : 'contains');
   	if(options.matchCase === undefined){options.matchCase = false;}
   	if(options.exactMatch === undefined){options.exactMatch = false;}
   	if(options.autoSelectFirst === undefined){options.autoSelectFirst = true;}
@@ -348,7 +365,8 @@ function object(obj){
 
       if(input.tagName == 'INPUT'){
         // Text input: ready for QuickSelect-ing!
-  	    QuickSelect(input, my_options);
+  	    var qs = new QuickSelect(input, my_options);
+  	    $(input).data('quickselect', qs);
 
   		} else if(input.tagName == 'SELECT'){
         // Select input: transform into Text input, then make QuickSelect.
