@@ -1,4 +1,4 @@
-// Credit to Anders Retterås for adding functionality preventing onblur event to fire on text input when clicking on scrollbars in MSIE / Opera.
+// Credit to Anders Retteras for adding functionality preventing onblur event to fire on text input when clicking on scrollbars in MSIE / Opera.
 // Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with no options and then Compact.
 // Packed version created at http://jsutility.pjoneil.net/ by running Compress on the Minified version.
 
@@ -158,7 +158,7 @@ function object(obj){
     		$input_element.val(label); // Set the visible value
     		previous_value = label;
     		results_list.empty(); // clear the results list
-        $(options.additional_fields).each(function(i,input){$(input).val(values[i+1]);}); // set the additional fields' values
+        $(options.additionalFields).each(function(i,input){$(input).val(values[i+1]);}); // set the additional fields' values
         if(!from_hide_now_function){hideResultsNow();} // hide the results when something is selected
     		if(options.onItemSelect){setTimeout(function(){ options.onItemSelect(li); }, 1);} // run the user callback, if set
     		return true;
@@ -171,7 +171,7 @@ function object(obj){
           // No current selection - blank the fields if options.exactMatch and current value isn't valid.
           if(options.exactMatch){
             $input_element.val('');
-            options.additional_fields.each(function(i,input){$(input).val('');});
+            options.additionalFields.each(function(i,input){$(input).val('');});
           }
           return false;
     		}
@@ -252,7 +252,7 @@ function object(obj){
           repopulate(q,show_results);
     		} else { // if too short, hide the list.
     		  if(q.length === 0 && (options.onBlank ? options.onBlank() : true)){ // onBlank callback
-    		    options.additional_fields.each(function(i,input){input.value='';});
+    		    options.additionalFields.each(function(i,input){input.value='';});
     		  }
     			$input_element.removeClass(options.loadingClass);
     			results_list.hide();
@@ -336,13 +336,13 @@ function object(obj){
   	if(options.exactMatch === undefined){options.exactMatch = false;}
   	if(options.autoSelectFirst === undefined){options.autoSelectFirst = true;}
   	if(options.selectSingleMatch === undefined){options.selectSingleMatch = true;}
-  	if(options.additional_fields === undefined){options.additional_fields = $('nothing');}
+  	if(options.additionalFields === undefined){options.additionalFields = $('nothing');}
   	options.maxVisibleItems = options.maxVisibleItems || -1;
   	if(options.autoFill === undefined || options.matchMethod != 'startsWith'){options.autoFill = false;} // if you're not using the startsWith match, it really doesn't help to autoFill.
   	options.width         = parseInt(options.width, 10) || 0;
     
     // Make quickselects.
-  	this.each(function(){
+  	return this.each(function(){
   		var input = this,
           my_options = object(options);
 
@@ -376,7 +376,7 @@ function object(obj){
 
         // From a select, we need to work off two values, from the label and value of the select options.
         // Record the first (label) in the text input, the second (value) in the hidden input.
-        my_options.additional_fields = hidden_input;
+        my_options.additionalFields = hidden_input;
         
         // Replace the select with a quickselect text_input
       	$(input).after(text_input).after(hidden_input).remove(); // add text input, hidden input, remove select.

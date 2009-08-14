@@ -59,7 +59,7 @@
             match:'substring',
             autoSelectFirst:false,
             mustMatch:true,
-            additional_fields:[$('#city'), $('#state')],
+            additionalFields:[$('#city'), $('#state')],
             formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
           });
         </script>
@@ -75,7 +75,7 @@
                 match:'substring',
                 autoSelectFirst:false,
                 mustMatch:true,
-                additional_fields:[$('#city'), $('#state')],
+                additionalFields:[$('#city'), $('#state')],
                 formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
               });
             &lt;/script&gt;
@@ -140,7 +140,7 @@
 				Note that for a converted select group, some option defaults change:<br />
 				{mustMatch : true, autoSelectFirst : true}<br />
 				Also, some options are effectively disabled:<br />
-				ajax, data, additional_fields.
+				ajax, data, additionalFields.
       </p>
 <pre style='background-color: #DDD; border: 1px dotted black'>
   <code>
@@ -208,12 +208,12 @@
     <li><b>matchCase:</b> specify that the drop-down should be case-sensitive.</li>
     <li><b>match:</b> ‘substring’ for exact match-as-you-type, ‘quicksilver’ for similarity matching. Auto-detects whether quicksilver.js is included and active, and defaults to quicksilver mode if it can.</li>
     <li><b>matchContains:</b> use with ‘substring’ only, means that what you type can match anywhere in the choice item, not just the beginning.</li>
-    <li><b>mustMatch:</b> if you’re not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additional_fields instantly get blank values.</li>
+    <li><b>mustMatch:</b> if you’re not using any auto-select option, use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additionalFields instantly get blank values.</li>
     <li><b>extraParams:</b> extra parameters for the ajax url.</li>
     <li><b>autoSelectFirst:</b> keep the first item selected as you type, and tab or enter will automatically fill in the rest from the top item.</li>
     <li><b>selectSingleMatch:</b> use this if NOT using autoSelectFirst, to make the control automatically select the top item when there is only one matched item left.</li>
     <li><b>maxItemsToShow:</b> only show up to x number of items.</li>
-    <li><b>additional_fields:</b> (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.</li>
+    <li><b>additionalFields:</b> (a jquery object with one or more elements) more fields to update with the extra data. Not honored when converting a select/option group to a quickselect control. For example, you may want to provide quickselect on a zipcode field, but when selected, update the city and state field automatically with the results.</li>
     <li><b>autoFill:</b> use this if you want the text input to automatically try to finish what you’re typing as you type, based on the top entry. This only works well if your settings make the top listing exactly match what you’re typing.</li>
     <li><b>width:</b> set the width of the drop-down list.</li>
 		<li><b>formatItem:</b> assign a function to use for formatting the list items. The function is called with arguments: data, index, total. See example #2.
@@ -440,7 +440,7 @@
       width:200,
       autoSelectFirst:false,
 			mustMatch:true,
-      additional_fields:$('#other_thing_field'),
+      additionalFields:$('#other_thing_field'),
       formatItem:function(data, index, total){return data[0]+" (extra: "+data[1]+")"}
     });
 
