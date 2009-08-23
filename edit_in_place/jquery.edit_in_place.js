@@ -16,26 +16,24 @@
 
 $.fn.edit_in_place = function(callback){
   var $element = this;
-  if($element.length>1){console.error("Call $().edit_in_place only on a singular jquery object.");}
+  if($element.length>1){console.error("Call $().edit_in_place only on a singular jquery object.");return null;}
   var $edit = $('<input type="text" class="edit_in_place" />');
-  $edit.css({'height' : $element.height()-2, 'width' : $element.width()-2});
+  $edit.css({'height' : $element.height()-2, 'width' : $element.width()-2}); // don't know why 2, but it seems to work. Tweak this css stuff if you want, or add a class instead and style that.
   $element.hide();
   $element.after($edit);
   $edit.focus();
-  $edit.bind('blur', function(){ // on blur, forget edits and reset.
+  $edit.bind('blur', function(){ // on blur, forget edits, forget input box, revert everything.
     $edit.remove();
     $element.show();
   });
   $edit.keydown(function(e){
-    if(e.which===27)$edit.blur(); // blur on Esc: see above
-    if(e.which===13 || e.which===9){ // Enter or Tab: run the callback with the value
+    if(e.which===27)$edit.blur(); // Esc: just blur - see above
+    if(e.which===13 || e.which===9){ // Enter or Tab: reverts stuff and runs your callback with the value.
       e.preventDefault();
-      $edit.hide();
-      $element.show();
-      if($edit.val()!=='') callback($element, $edit.val());
-      // This causes a TypeError, no idea why! I'd rather use it...
-      // callback.apply($element, $edit.val());
+      var value = $edit.val();
       $edit.remove();
+      $element.show();
+      if(value!=='') callback.apply($element, [value]);
     }
   });
 };
