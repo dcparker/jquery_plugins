@@ -1,5 +1,5 @@
 ## EditInPlace
-A jQuery plugin that allows you to simply turn something into a text box that calls a callback with the value after the user hits Tab or Enter.
+A jQuery plugin that allows you to simply turn an element into a text box that disappears and calls a callback with the value after the user hits Tab or Enter.
 ## FuzzyString
 QuickSilver-like string matching, but on super steroids! So good that I can just think of an option and let my fingers hit the keyboard, and it STILL matches what I was thinking of as the best match.
 
