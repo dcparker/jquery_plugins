@@ -10,6 +10,30 @@
 // The given string must be given a base score as well, based on how many words, capital letters, etc, it has.
 // Each bonus is given to a character based on the total potential score of that bonus in the given string.
 
+// All of these are score MODIFIERS - each test character starts with a base score of 1, each applicable boost adds to (or subtracts from) its overall score.
+String.scoring_options = {
+  // just adds on to the acronym boost
+  firstChar : 0.5,
+  // such as 'qbf' or 'QBF' when referring to 'The Quick Brown Fox'
+  acronym : 1,
+  // match boost for matching capital letters, whether query was capital or not. Thus, 'ABC'.score('ABC') > 'abc'.score('abc')
+  capitalLetter : 0.2,
+  // when the query character matches case-sensitive
+  caseMatch : 0.2,
+  // when two consecutive characters of the query match two consecutive characters of the string
+  consecutiveChars : 0.2,
+  // when a query character is missing from the string
+  missingMatch : -5.5,
+  // when a query character matches in the string, but is not in order with the rest of the string
+  outOfOrder : {
+    // Subtracts this proportionally based on the ACTUAL point value of each character in the abbreviation,
+    // and then reduces the other boosts by the multiplier value. That way we're SURE it's always positively
+    // valuable to include a character even if it's out of place.
+    score: -1, // subtracts all of the base value of having the character in there - only bonuses count now.
+    multiplier: 0.1 // reduces the effect of the other boosts by a LOT - although if there are any boosts at all, the score will at least be positive
+  }
+};
+
 Array.prototype.remove = function(index){
   return this.splice(index,1)[0];
 };
@@ -133,10 +157,6 @@ var MatchTree = function(parent, string, abbr, positions){
     }
   }
 
-  // this.previous_matched_position = function(){
-  //   return parent.position
-  // };
-
   this.ancestry = function(){
     return this.parent ? this.parent.ancestry().concat([this]) : [];
   };
@@ -187,7 +207,7 @@ String.prototype.score = function(abbr){
     //   +bump for how many characters in the string match the test character
     //   +bump for close proximity
     //   +bump related to the size of the abbreviation compared to the size of the test string
-
+    //   +bump for a higher number of matching consecutive characters
 
     // Find all possible match paths
     var match_tree = new MatchTree(this, abbr);
