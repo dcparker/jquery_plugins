@@ -22,6 +22,7 @@ $.fn.edit_in_place = function(callback){
   $element.hide();
   $element.after($edit);
   $edit.focus();
+  $edit.select();
   $edit.bind('blur', function(){ // on blur, forget edits, forget input box, revert everything.
     $edit.remove();
     $element.show();
