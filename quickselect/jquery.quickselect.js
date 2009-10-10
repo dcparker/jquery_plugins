@@ -8,9 +8,11 @@ function object(obj){
   return new s();
 }
 
+var QuickSelect;
+
 (function($){
   // The job of the QuickSelect object is to encapsulate all the state of a select control and manipulate the DOM and interface events.
-  var QuickSelect = function($input_element, options){
+  QuickSelect = function($input_element, options){
     var self = this;
     $input_element = $($input_element);
     self.options = options;
@@ -157,7 +159,7 @@ function object(obj){
         $input_element.removeClass(options.loadingClass);
       };
       var repopulate = function(q,callback){
-        QuickSelect.finders[!options.data ? 'ajax' : 'store'].apply(self,[q,function(data){
+        QuickSelect.finders[options.finderFunction].apply(self,[q,function(data){
           repopulate_items(QuickSelect.matchers[options.matchMethod].apply(self,[q,data]));
           callback();
         }]);
@@ -334,6 +336,8 @@ function object(obj){
   };
 
   $.fn.quickselect = function(options, data){
+    if(options == 'instance' && $(this).data('quickselect')) return $(this).data('quickselect');
+
     // Prepare options and set defaults.
   	options = options || {};
   	options.data          = (typeof(options.data) === "object" && options.data.constructor == Array) ? options.data : undefined;
@@ -346,6 +350,9 @@ function object(obj){
   	options.loadingClass  = options.loadingClass || options.cssFlavor+"_loading";
   	options.resultsClass  = options.resultsClass || options.cssFlavor+"_results";
   	options.selectedClass = options.selectedClass || options.cssFlavor+"_selected";
+// wrap entire thing: .ui-widget
+// default item:      .ui-state-default
+// active / hover:    .ui-state-hover
     options.finderFunction = options.finderFunction || QuickSelect.finders[!options.data ? 'ajax' : 'store'];
     // matchMethod: (quicksilver | contains | startsWith). Defaults to 'quicksilver' if quicksilver.js is loaded / 'contains' otherwise.
     options.matchMethod   = options.matchMethod || (typeof(''.score) === 'function' && 'l'.score('l') == 1 ? 'quicksilver' : 'contains');
