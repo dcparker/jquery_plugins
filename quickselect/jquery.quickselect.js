@@ -263,7 +263,7 @@ var QuickSelect;
 
   QuickSelect.matchers = {
     quicksilver : function(q,data){
-			var match_query, match_label;
+			var match_query, match_label, self=this;
       match_query = (this.options.matchCase ? q : q.toLowerCase());
 			this.AllItems[match_query] = [];
       for(var i=0;i<data.length;i++){
@@ -284,17 +284,17 @@ var QuickSelect;
       });
     },
     contains : function(q,data){
-			var match_query, match_label, that=this;
-      match_query = (this.options.matchCase ? q : q.toLowerCase());
-      this.AllItems[match_query] = [];
+			var match_query, match_label, self=this;
+      match_query = (self.options.matchCase ? q : q.toLowerCase());
+      self.AllItems[match_query] = [];
       for(var i=0;i<data.length;i++){
-        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
-        if(match_label.indexOf(match_query)>-1){this.AllItems[match_query].push(data[i]);}
+        match_label = (self.options.matchCase ? self.getLabel(data[i]) : self.getLabel(data[i]).toLowerCase());
+        if(match_label.indexOf(match_query)>-1){self.AllItems[match_query].push(data[i]);}
       }
-			return this.AllItems[match_query].sort(function(a,b){
+			return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (that.options.matchCase ? that.getLabel(a) : that.getLabel(a).toLowerCase());
-        b = (that.options.matchCase ? that.getLabel(b) : that.getLabel(b).toLowerCase());
+        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Get proximities
         var a_proximity = a.indexOf(match_query);
         var b_proximity = b.indexOf(match_query);
@@ -303,17 +303,17 @@ var QuickSelect;
       });
     },
     startsWith : function(q,data){
-			var match_query, match_label;
-      match_query = (this.options.matchCase ? q : q.toLowerCase());
-      this.AllItems[match_query] = [];
+			var match_query, match_label, self=this;
+      match_query = (self.options.matchCase ? q : q.toLowerCase());
+      self.AllItems[match_query] = [];
       for(var i=0;i<data.length;i++){
-        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
-        if(match_label.indexOf(match_query)===0){this.AllItems[match_query].push(data[i]);}
+        match_label = (self.options.matchCase ? self.getLabel(data[i]) : self.getLabel(data[i]).toLowerCase());
+        if(match_label.indexOf(match_query)===0){self.AllItems[match_query].push(data[i]);}
       }
-			return this.AllItems[match_query].sort(function(a,b){
+			return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
-        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Compare a & b alphabetically
         return(a > b ? -1 : (b > a ? 1 : 0));
       });
