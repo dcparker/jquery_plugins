@@ -35,7 +35,7 @@ var QuickSelect;
       }
 
     // Create the list DOM
-      results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute"></div>').hide();
+      results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute;z-index:9999;"></div>').hide();
       // Supposedly if we position an iframe behind the results list, before we position the results list, it will hide select elements in IE.
       results_mask = $('<iframe />');
       results_mask.css({border:'none',position:'absolute'});
