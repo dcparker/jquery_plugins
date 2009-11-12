@@ -11,10 +11,10 @@ h4. Installation
 
 # Include the jquery library in your project.
 # Then you'll need the following files for this plugin:
-#* "quicksilver.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fquicksilver.js?raw=true
-#* OR "similar.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fsimilar%2Fsimilar.js?raw=true
-#* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.js?raw=true
-#* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/tree/master%2Fquickselect%2Fjquery.quickselect.css?raw=true
+#* "quicksilver.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/quicksilver.js
+#* OR "fuzzy-string.js":http://github.com/dcparker/jquery_plugins/raw/master/fuzzy-string/fuzzy-string.js
+#* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.js
+#* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.css
 
 h4. Usage
 

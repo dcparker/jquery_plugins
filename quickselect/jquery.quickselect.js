@@ -159,8 +159,8 @@ var QuickSelect;
         return true;
       };
       var repopulate = function(q,callback){
-        QuickSelect.finders[options.finderFunction].apply(self,[q,function(data){
-          repopulate_items(QuickSelect.matchers[options.matchMethod].apply(self,[q,data]));
+        options.finderFunction.apply(self,[q,function(data){
+          repopulate_items(options.matchMethod.apply(self,[q,data]));
           callback();
         }]);
       };
@@ -321,7 +321,7 @@ var QuickSelect;
   };
 
   QuickSelect.finders = {
-    store : function(q,callback){
+    data : function(q,callback){
       callback(this.options.data);
     },
     ajax  : function(q,callback){
@@ -353,14 +353,17 @@ var QuickSelect;
 // wrap entire thing: .ui-widget
 // default item:      .ui-state-default
 // active / hover:    .ui-state-hover
-    options.finderFunction = options.finderFunction || QuickSelect.finders[!options.data ? 'ajax' : 'store'];
-    // matchMethod: (quicksilver | contains | startsWith). Defaults to 'quicksilver' if quicksilver.js is loaded / 'contains' otherwise.
-    options.matchMethod   = options.matchMethod || (typeof(''.score) === 'function' && 'l'.score('l') == 1 ? 'quicksilver' : 'contains');
-  	if(options.matchCase === undefined){options.matchCase = false;}
-  	if(options.exactMatch === undefined){options.exactMatch = false;}
-  	if(options.autoSelectFirst === undefined){options.autoSelectFirst = true;}
-  	if(options.selectSingleMatch === undefined){options.selectSingleMatch = true;}
-  	if(options.additionalFields === undefined){options.additionalFields = $('nothing');}
+    // finderFunction: (data | ajax | <custom>)
+    options.finderFunction = options.finderFunction || QuickSelect.finders[!options.data ? 'ajax' : 'data'];
+      if(options.finderFunction==='data' || options.finderFunction==='ajax') options.finderFunction = QuickSelect.finders[options.finderFunction];
+    // matchMethod: (quicksilver | contains | startsWith | <custom>). Defaults to 'quicksilver' if quicksilver.js is loaded / 'contains' otherwise.
+    options.matchMethod   = options.matchMethod || QuickSelect.matchers[(typeof(''.score) === 'function' && 'l'.score('l') == 1 ? 'quicksilver' : 'contains')];
+      if(options.matchMethod==='quicksilver' || options.matchMethod==='contains' || options.matchMethod==='startsWith') options.matchMethod = QuickSelect.matchers[options.matchMethod];
+  	if(options.matchCase === undefined) options.matchCase = false;
+  	if(options.exactMatch === undefined) options.exactMatch = false;
+  	if(options.autoSelectFirst === undefined) options.autoSelectFirst = true;
+  	if(options.selectSingleMatch === undefined) options.selectSingleMatch = true;
+  	if(options.additionalFields === undefined) options.additionalFields = $('nothing');
   	options.maxVisibleItems = options.maxVisibleItems || -1;
   	if(options.autoFill === undefined || options.matchMethod != 'startsWith'){options.autoFill = false;} // if you're not using the startsWith match, it really doesn't help to autoFill.
   	options.width         = parseInt(options.width, 10) || 0;
