@@ -264,18 +264,18 @@ var QuickSelect;
   QuickSelect.matchers = {
     quicksilver : function(q,data){
 			var match_query, match_label, self=this;
-      match_query = (this.options.matchCase ? q : q.toLowerCase());
-			this.AllItems[match_query] = [];
+      match_query = (self.options.matchCase ? q : q.toLowerCase());
+			self.AllItems[match_query] = [];
       for(var i=0;i<data.length;i++){
-        match_label = (this.options.matchCase ? this.getLabel(data[i]) : this.getLabel(data[i]).toLowerCase());
+        match_label = (self.options.matchCase ? self.getLabel(data[i]) : self.getLabel(data[i]).toLowerCase());
         // Filter by match/no-match
-        if(match_label.score(match_query)>0){this.AllItems[match_query].push(data[i]);}
+        if(match_label.score(match_query)>0){self.AllItems[match_query].push(data[i]);}
 			}
       // Sort by match relevance
-			return this.AllItems[match_query].sort(function(a,b){
+			return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
-        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Score a & b
     	  a = a.score(match_query);
         b = b.score(match_query);
