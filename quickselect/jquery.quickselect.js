@@ -31,7 +31,7 @@ var QuickSelect;
           results_list,
           results_mask;
       if(/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ //test for MSIE x.x;
-        if(Number(RegExp.$1) <= 7){ie_stupidity=true;}
+        if(Number(RegExp.$1) <= 7) ie_stupidity=true;
       }
 
     // Create the list DOM
@@ -44,7 +44,7 @@ var QuickSelect;
     	  results_mask.css("width", options.width);
     	}
     	$('body').append(results_list);
-      if(ie_stupidity){$('body').append(results_mask);}
+      if(ie_stupidity) $('body').append(results_mask);
 
     // Set up all of the methods
       self.getLabel = function(item){
@@ -55,14 +55,13 @@ var QuickSelect;
       };
      	var moveSelect = function(step_or_li){
     		var lis = $('li', results_list);
-    		if(!lis){return;}
+    		if(!lis) return;
 
-     	  if(typeof(step_or_li)==="number"){activeSelection = activeSelection + step_or_li;}
-     	  else{activeSelection = lis.index(step_or_li);}
+     	  if(typeof(step_or_li)==="number") activeSelection = activeSelection + step_or_li;
+     	  else activeSelection = lis.index(step_or_li);
 
-    		if(activeSelection < 0){activeSelection = 0;}
-    		  else{if(activeSelection >= lis.size()){
-    		    activeSelection = lis.size() - 1;}}
+    		if(activeSelection < 0) activeSelection = 0;
+  		  else if(activeSelection >= lis.size()) activeSelection = lis.size() - 1;
 
     		lis.removeClass(options.selectedClass);
     		$(lis[activeSelection]).addClass(options.selectedClass);
@@ -92,8 +91,8 @@ var QuickSelect;
       var hideResultsNow = function(){
         if(timeout){clearTimeout(timeout);}
     		$input_element.removeClass(options.loadingClass);
-    		if(results_list.is(":visible")){results_list.hide();}
-    		if(results_mask.is(":visible")){results_mask.hide();}
+    		if(results_list.is(":visible")) results_list.hide();
+    		if(results_mask.is(":visible")) results_mask.hide();
       };
       self.selectItem = function(li, from_hide_now_function){
     		if(!li){
@@ -107,8 +106,8 @@ var QuickSelect;
     		previous_value = label;
     		results_list.empty(); // clear the results list
         $(options.additionalFields).each(function(i,input){$(input).val(values[i+1]);}); // set the additional fields' values
-        if(!from_hide_now_function){hideResultsNow();} // hide the results when something is selected
-    		if(options.onItemSelect){setTimeout(function(){ options.onItemSelect(li); }, 1);} // run the user callback, if set
+        if(!from_hide_now_function)hideResultsNow(); // hide the results when something is selected
+    		if(options.onItemSelect)setTimeout(function(){ options.onItemSelect(li); }, 1); // run the user callback, if set
     		return true;
       };
       var selectCurrent = function(){
@@ -128,7 +127,7 @@ var QuickSelect;
         // Clear the results to begin:
         results_list.empty();
         // If the field no longer has focus or if there are no matches, forget it.
-    		if(!hasFocus || items === null || items.length === 0){return hideResultsNow();}
+    		if(!hasFocus || items === null || items.length === 0) return hideResultsNow();
     		
       	var ul = document.createElement("ul"),
       	    total_count = items.length,
@@ -138,7 +137,7 @@ var QuickSelect;
             cf = function(e){ e.preventDefault(); e.stopPropagation(); self.selectItem(this); };
     		results_list.append(ul);
       	// limited results to a max number
-      	if(options.maxVisibleItems > 0 && options.maxVisibleItems < total_count){total_count = options.maxVisibleItems;}
+      	if(options.maxVisibleItems > 0 && options.maxVisibleItems < total_count) total_count = options.maxVisibleItems;
 
         // Add each item:
         for(var i=0; i<total_count; i++){
@@ -150,13 +149,14 @@ var QuickSelect;
           // Save the extra values (if any) to the li
     			li.item = item;
           // Set the class name, if specified
-    			if(item.className){li.className = item.className;}
+    			if(item.className) li.className = item.className;
       		ul.appendChild(li);
       		$(li).hover(hf, bf).click(cf);
         }
 
         // Lastly, remove the loading class.
         $input_element.removeClass(options.loadingClass);
+        return true;
       };
       var repopulate = function(q,callback){
         QuickSelect.finders[options.finderFunction].apply(self,[q,function(data){
@@ -184,14 +184,14 @@ var QuickSelect;
       	}).show();}
       	results_list.show();
         // Option autoSelectFirst, and Option selectSingleMatch (activate the first item if only item)
-        if(options.autoSelectFirst || (options.selectSingleMatch && $lis.length == 1)){moveSelect($lis.get(0));}
+        if(options.autoSelectFirst || (options.selectSingleMatch && $lis.length == 1)) moveSelect($lis.get(0));
       };
       var onChange = function(){
     		// ignore if non-consequence key is pressed (such as shift, ctrl, alt, escape, caps, pg up/down, home, end, arrows)
     		if(last_keyCode >= 9 && last_keyCode <= 45){return;}
         // compare with previous value / store new previous value
     		var q = $input_element.val();
-    		if(q == previous_value){return;}
+    		if(q == previous_value) return;
     		previous_value = q;
         // if enough characters have been typed, load/populate the list with whatever matches and show the results list.
     		if(q.length >= options.minChars){
@@ -199,9 +199,8 @@ var QuickSelect;
           // Populate the list, then show the list.
           repopulate(q,show_results);
     		} else { // if too short, hide the list.
-    		  if(q.length === 0 && (options.onBlank ? options.onBlank() : true)){ // onBlank callback
+    		  if(q.length === 0 && (options.onBlank ? options.onBlank() : true)) // onBlank callback
     		    $(options.additionalFields).each(function(i,input){input.value='';});
-    		  }
     			$input_element.removeClass(options.loadingClass);
     			results_list.hide();
     			results_mask.hide();
@@ -214,24 +213,24 @@ var QuickSelect;
       $input_element.keydown(function(e){
         last_keyCode = e.keyCode;
         switch(e.keyCode){
-          case 38: // up arrow - select prev item in the drop-down
+          case 38: // Up arrow - select prev item in the drop-down
             e.preventDefault();
             moveSelect(-1);
             break;
-          case 40: // down arrow - select next item in the drop-down
+          case 40: // Down arrow - select next item in the drop-down
             e.preventDefault();
             if(!results_list.is(":visible")){
               show_results();
               moveSelect(0);
             }else{moveSelect(1);}
             break;
-          case 13: // return - select item and stay in field
+          case 13: // Enter/Return - select item and stay in field
             if(selectCurrent()){
               e.preventDefault();
               $input_element.select();
             }
             break;
-          case 9:  // tab - select the currently selected, let the onblur happen
+          case 9:  // Tab - select the currently selected, let the onblur happen
             // selectCurrent();
             break;
           case 27: // Esc - deselect any active selection, hide the drop-down but stay in the field
@@ -256,6 +255,7 @@ var QuickSelect;
     		timeout = setTimeout(function(){
     		  hideResultsNow();
           // Select null element, IF options.exactMatch and there is no selection.
+          // !! CLEARS THE FIELD IF YOU BLUR AFTER CHOOSING THE ITEM AND RESULTS ARE ALREADY CLOSED!
           if(options.exactMatch && $input_element.val() != $input_element.lastSelected){self.selectItem(null,true);}
     		}, 200);
     	});
@@ -284,7 +284,7 @@ var QuickSelect;
       });
     },
     contains : function(q,data){
-			var match_query, match_label;
+			var match_query, match_label, that=this;
       match_query = (this.options.matchCase ? q : q.toLowerCase());
       this.AllItems[match_query] = [];
       for(var i=0;i<data.length;i++){
@@ -293,8 +293,8 @@ var QuickSelect;
       }
 			return this.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (this.options.matchCase ? this.getLabel(a) : this.getLabel(a).toLowerCase());
-        b = (this.options.matchCase ? this.getLabel(b) : this.getLabel(b).toLowerCase());
+        a = (that.options.matchCase ? that.getLabel(a) : that.getLabel(a).toLowerCase());
+        b = (that.options.matchCase ? that.getLabel(b) : that.getLabel(b).toLowerCase());
         // Get proximities
         var a_proximity = a.indexOf(match_query);
         var b_proximity = b.indexOf(match_query);
