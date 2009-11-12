@@ -355,7 +355,9 @@ var QuickSelect;
 // active / hover:    .ui-state-hover
     // finderFunction: (data | ajax | <custom>)
     options.finderFunction = options.finderFunction || QuickSelect.finders[!options.data ? 'ajax' : 'data'];
+    // console.log(options.finderFunction);
       if(options.finderFunction==='data' || options.finderFunction==='ajax') options.finderFunction = QuickSelect.finders[options.finderFunction];
+    // console.log(options.finderFunction);
     // matchMethod: (quicksilver | contains | startsWith | <custom>). Defaults to 'quicksilver' if quicksilver.js is loaded / 'contains' otherwise.
     options.matchMethod   = options.matchMethod || QuickSelect.matchers[(typeof(''.score) === 'function' && 'l'.score('l') == 1 ? 'quicksilver' : 'contains')];
       if(options.matchMethod==='quicksilver' || options.matchMethod==='contains' || options.matchMethod==='startsWith') options.matchMethod = QuickSelect.matchers[options.matchMethod];
@@ -381,6 +383,7 @@ var QuickSelect;
   		} else if(input.tagName == 'SELECT'){
         // Select input: transform into Text input, then make QuickSelect.
       	my_options.delay = my_options.delay || 10; // for selects, we know we're not doing ajax, so we might as well speed up
+        my_options.finderFunction = 'data';
 
         // Record the html stuff from the select
         var name = input.name,
@@ -408,6 +411,7 @@ var QuickSelect;
         
         // Replace the select with a quickselect text_input
       	$(input).after(text_input).after(hidden_input).remove(); // add text input, hidden input, remove select.
+        console.log(my_options);
       	text_input.quickselect(my_options); // make the text input into a QuickSelect.
       }
     });
