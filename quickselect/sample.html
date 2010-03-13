@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <title>jQuery : QuickSelect</title>
-  <script type="text/javascript" src="jquery-1.2.6.pack.js"></script>
+  <script type="text/javascript" src="jquery-1.4.2.min.js"></script>
   <script type='text/javascript' src='quicksilver.js'></script>
   <script type='text/javascript' src='jquery.quickselect.js'></script>
   <link rel="stylesheet" type="text/css" href="jquery.quickselect.css" />
@@ -58,13 +58,15 @@
         <label>State</label>
         <input id="state" type="text" />
         <script type="text/javascript">
-          $('#zip').quickselect({
-            ajax:'zips_starting_with_49.json',
-            match:'substring',
-            autoSelectFirst:false,
-            mustMatch:true,
-            additionalFields:[$('#city'), $('#state')],
-            formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+          $(function(){
+            $('#zip').quickselect({
+              ajax:'zips_starting_with_49.json',
+              match:'substring',
+              autoSelectFirst:false,
+              mustMatch:true,
+              additionalFields:[$('#city'), $('#state')],
+              formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+            });
           });
         </script>
         <pre style='background-color: #DDD; border: 1px dotted black'>
@@ -74,13 +76,15 @@
             &lt;label>State&lt;/label&gt; &lt;input type="text" id="state" /&gt;
             
             &lt;script type="text/javascript"&gt;
-              $('#zip').quickselect({
-                ajax:'zips_starting_with_49.json',    /* call to url with json formatted array of data */
-                match:'substring',
-                autoSelectFirst:false,
-                mustMatch:true,
-                additionalFields:[$('#city'), $('#state')],
-                formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+              $(function(){
+                $('#zip').quickselect({
+                  ajax:'zips_starting_with_49.json',    /* call to url with json formatted array of data */
+                  match:'substring',
+                  autoSelectFirst:false,
+                  mustMatch:true,
+                  additionalFields:[$('#city'), $('#state')],
+                  formatItem:function(data, index, total){return data[0]+", "+data[1]+" "+data[2]}
+                });
               });
             &lt;/script&gt;
           </code>
@@ -161,7 +165,9 @@
     &lt;select&gt;
 
     &lt;script&gt;
-      $("#ExampleThree_OptionsData").quickselect();
+      $(function(){
+        $("#ExampleThree_OptionsData").quickselect();
+      });
     &lt;/script&gt;
   </code>
 </pre>
@@ -174,7 +180,7 @@
   <h2>Another converted Select...</h2>
   <p id='example_4'>
     select/options tags converted to text input coupled with hidden input:<br />
-    City:
+    Agency:
     <select id='example_4_select' name='example_4'>
       <option></option>
       <option value="1">Cornerstone Title Insurance Agency</option>
@@ -184,7 +190,7 @@
       <option value="5">Title Pro Agency LLC</option>
     </select>
   </p>
-  <script type='text/javascript'>$('p#example_4 select').quickselect({mustMatch:true});</script>
+  <script type='text/javascript'>$(function(){ $('p#example_4 select').quickselect({mustMatch:true}); });</script>
 
 
   <h3>Plugin Files</h3>
@@ -229,11 +235,8 @@
 
 
   <script type="text/javascript">
-  $(function(){
-    $('#ExampleOne_LocalData').quickselect({
-      maxItemsToShow:10,
-      autoSelectFirst:false,
-      data:[
+    $(function(){
+      var cities = [
         "Aberdeen", "Ada", "Adamsville", ["Addyston", 'Addyston', 'closed'], "Adelphi", "Adena", "Adrian", "Akron",
         "Albany", "Alexandria", "Alger", "Alledonia", "Alliance", "Alpha", "Alvada",
         "Alvordton", "Amanda", "Amelia", "Amesville", "Amherst", "Amlin", "Amsden",
@@ -434,23 +437,29 @@
         "Winesburg", "Wingett Run", "Winona", "Wolf Run", "Woodsfield",
         "Woodstock", "Woodville", "Wooster", "Wren", "Xenia", "Yellow Springs",
         "Yorkshire", "Yorkville", "Youngstown", "Zaleski", "Zanesfield", "Zanesville",
-        "Zoar"]
-    });
+        "Zoar"
+      ];
 
-    $('#ExampleTwo_AjaxData').quickselect({
-      ajax:'ask.json',
-      match:'substring',
-      minChars:2,
-      delay:1000,
-      width:200,
-      autoSelectFirst:false,
-      mustMatch:true,
-      additionalFields:$('#other_thing_field'),
-      formatItem:function(data, index, total){return data[0]+" (extra: "+data[1]+")"}
-    });
+      $('#ExampleOne_LocalData').quickselect({
+        maxItemsToShow:10,
+        autoSelectFirst:false,
+        data:cities
+      });
 
-    $("#ExampleThree_OptionsData").quickselect({autoFill:true, matchMethod:'startsWith'});
-  });
+      $('#ExampleTwo_AjaxData').quickselect({
+        ajax:'ask.json',
+        match:'substring',
+        minChars:2,
+        delay:1000,
+        width:200,
+        autoSelectFirst:false,
+        mustMatch:true,
+        additionalFields:$('#other_thing_field'),
+        formatItem:function(data, index, total){ return data[0]+" (extra: "+data[1]+")"; }
+      });
+
+      $("#ExampleThree_OptionsData").quickselect({autoFill:true, matchMethod:'startsWith'});
+    });
   </script>
 </body>
 </html>

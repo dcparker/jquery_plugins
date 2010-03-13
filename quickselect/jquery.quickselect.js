@@ -1,5 +1,5 @@
 // Credit to Anders Retteras for adding functionality preventing onblur event to fire on text input when clicking on scrollbars in MSIE / Opera.
-// Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with no options and then Compact.
+// Minified version created at http://jsutility.pjoneil.net/ by running Obfuscation with all options unchecked, and then Compact.
 // Packed version created at http://jsutility.pjoneil.net/ by running Compress on the Minified version.
 
 function object(obj){
@@ -15,6 +15,7 @@ var QuickSelect;
   QuickSelect = function($input_element, options){
     var self = this;
     $input_element = $($input_element);
+    $input_element.attr('autocomplete', 'off');
     self.options = options;
 
     // Save the state of the control
@@ -28,23 +29,24 @@ var QuickSelect;
           previous_value,
           timeout,
           ie_stupidity = false,
-          results_list,
-          results_mask;
+          $results_list,
+          $results_mask;
       if(/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ //test for MSIE x.x;
         if(Number(RegExp.$1) <= 7) ie_stupidity=true;
       }
 
     // Create the list DOM
-      results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute;z-index:9999;"></div>').hide();
+      $results_list = $('<div class="'+options.resultsClass+'" style="display:block;position:absolute;z-index:9999;"></div>').hide();
       // Supposedly if we position an iframe behind the results list, before we position the results list, it will hide select elements in IE.
-      results_mask = $('<iframe />');
-      results_mask.css({border:'none',position:'absolute'});
+      $results_mask = $('<iframe />');
+      $results_mask.css({border:'none',position:'absolute'});
     	if(options.width>0){
-    	  results_list.css("width", options.width);
-    	  results_mask.css("width", options.width);
+    	  $results_list.css("width", options.width);
+    	  $results_mask.css("width", options.width);
     	}
-    	$('body').append(results_list);
-      if(ie_stupidity) $('body').append(results_mask);
+    	$('body').append($results_list);
+    	$results_list.hide(); // in case for some reason it didn't hide before appending it?
+      if(ie_stupidity) $('body').append($results_mask);
 
     // Set up all of the methods
       self.getLabel = function(item){
@@ -54,7 +56,7 @@ var QuickSelect;
         return item.values || (item.value ? [item.value] : (typeof(item)==='string' ? [item] : item)) || []; // hash:item.values || item.value; string:item; array:item[1..end]
       };
      	var moveSelect = function(step_or_li){
-    		var lis = $('li', results_list);
+    		var lis = $('li', $results_list);
     		if(!lis) return;
 
      	  if(typeof(step_or_li)==="number") activeSelection = activeSelection + step_or_li;
@@ -91,8 +93,9 @@ var QuickSelect;
       var hideResultsNow = function(){
         if(timeout){clearTimeout(timeout);}
     		$input_element.removeClass(options.loadingClass);
-    		if(results_list.is(":visible")) results_list.hide();
-    		if(results_mask.is(":visible")) results_mask.hide();
+    		if($results_list.is(":visible")) $results_list.hide();
+    		if($results_mask.is(":visible")) $results_mask.hide();
+    		activeSelection = -1;
       };
       self.selectItem = function(li, from_hide_now_function){
     		if(!li){
@@ -104,14 +107,14 @@ var QuickSelect;
     		$input_element.lastSelected = label;
     		$input_element.val(label); // Set the visible value
     		previous_value = label;
-    		results_list.empty(); // clear the results list
+    		$results_list.empty(); // clear the results list
         $(options.additionalFields).each(function(i,input){$(input).val(values[i+1]);}); // set the additional fields' values
         if(!from_hide_now_function)hideResultsNow(); // hide the results when something is selected
     		if(options.onItemSelect)setTimeout(function(){ options.onItemSelect(li); }, 1); // run the user callback, if set
     		return true;
       };
       var selectCurrent = function(){
-        var li = $("li."+options.selectedClass, results_list).get(0);
+        var li = $("li."+options.selectedClass, $results_list).get(0);
     		if(li){
     			return self.selectItem(li);
     		} else {
@@ -125,7 +128,7 @@ var QuickSelect;
       };
       var repopulate_items = function(items){
         // Clear the results to begin:
-        results_list.empty();
+        $results_list.empty();
         // If the field no longer has focus or if there are no matches, forget it.
     		if(!hasFocus || items === null || items.length === 0) return hideResultsNow();
     		
@@ -135,7 +138,7 @@ var QuickSelect;
             hf = function(){ moveSelect(this); },
             bf = function(){},
             cf = function(e){ e.preventDefault(); e.stopPropagation(); self.selectItem(this); };
-    		results_list.append(ul);
+    		$results_list.append(ul);
       	// limited results to a max number
       	if(options.maxVisibleItems > 0 && options.maxVisibleItems < total_count) total_count = options.maxVisibleItems;
 
@@ -143,7 +146,7 @@ var QuickSelect;
         for(var i=0; i<total_count; i++){
           var item = items[i],
       		    li = document.createElement("li");
-          results_list.append(li);
+          $results_list.append(li);
     			$(li).text(options.formatItem ? options.formatItem(item, i, total_count) : self.getLabel(item));
 
           // Save the extra values (if any) to the li
@@ -169,20 +172,20 @@ var QuickSelect;
       	// iWidth: either use the specified width, or autocalculate based on form element
       	var pos = $input_element.offset(),
       	    iWidth = (options.width > 0 ? options.width : $input_element.width()),
-            $lis = $('li', results_list);
+            $lis = $('li', $results_list);
       	// reposition
-      	results_list.css({
+      	$results_list.css({
       		width: parseInt(iWidth,10) + "px",
       		top: pos.top + $input_element.height() + 5 + "px",
       		left: pos.left + "px"
       	});
-      	if(ie_stupidity){results_mask.css({
+      	if(ie_stupidity){$results_mask.css({
       		width: parseInt(iWidth,10) - 2 + "px",
       		top: pos.top + $input_element.height() + 6 + "px",
       		left: pos.left + 1 + "px",
-      		height: results_list.height() - 2+'px'
+      		height: $results_list.height() - 2+'px'
       	}).show();}
-      	results_list.show();
+      	$results_list.show();
         // Option autoSelectFirst, and Option selectSingleMatch (activate the first item if only item)
         if(options.autoSelectFirst || (options.selectSingleMatch && $lis.length == 1)) moveSelect($lis.get(0));
       };
@@ -202,14 +205,14 @@ var QuickSelect;
     		  if(q.length === 0 && (options.onBlank ? options.onBlank() : true)) // onBlank callback
     		    $(options.additionalFields).each(function(i,input){input.value='';});
     			$input_element.removeClass(options.loadingClass);
-    			results_list.hide();
-    			results_mask.hide();
+    			$results_list.hide();
+    			$results_mask.hide();
     		}
       };
       
     // Set up the interface events
       // Mark that actual item was clicked if clicked item was NOT a DIV, so the focus doesn't leave the items.
-      results_list.mousedown(function(e){if(e.srcElement)clickedLI=e.srcElement.tagName!='DIV';});
+      $results_list.mousedown(function(e){if(e.srcElement)clickedLI=e.srcElement.tagName!='DIV';});
       $input_element.keydown(function(e){
         last_keyCode = e.keyCode;
         switch(e.keyCode){
@@ -219,7 +222,7 @@ var QuickSelect;
             break;
           case 40: // Down arrow - select next item in the drop-down
             e.preventDefault();
-            if(!results_list.is(":visible")){
+            if(!$results_list.is(":visible")){
               show_results();
               moveSelect(0);
             }else{moveSelect(1);}
@@ -235,8 +238,8 @@ var QuickSelect;
             break;
           case 27: // Esc - deselect any active selection, hide the drop-down but stay in the field
             // Reset the active selection IF must be exactMatch and is not an exact match.
-            if(activeSelection > -1 && options.exactMatch && $input_element.val()!=$($('li', results_list).get(activeSelection)).text()){activeSelection = -1;}
-        		$('li', results_list).removeClass(options.selectedClass);
+            if(activeSelection > -1 && options.exactMatch && $input_element.val()!=$($('li', $results_list).get(activeSelection)).text()){activeSelection = -1;}
+        		$('li', $results_list).removeClass(options.selectedClass);
          	  hideResultsNow();
             e.preventDefault();
             break;
@@ -400,7 +403,7 @@ var QuickSelect;
   		  });
 
         // Create the text input and hidden input
-        var text_input = $("<input type='text' class='"+className+"' id='"+id+"_quickselect' autocomplete='off' accesskey='"+accesskey+"' tabindex='"+tabindex+"' />");
+        var text_input = $("<input type='text' class='"+className+"' id='"+id+"_quickselect' accesskey='"+accesskey+"' tabindex='"+tabindex+"' />");
         if(selected_option){text_input.val($(selected_option).text());}
         var hidden_input = $("<input type='hidden' id='"+id+"' name='"+input.name+"' />");
         if(selected_option){hidden_input.val(selected_option.value);}
@@ -411,7 +414,7 @@ var QuickSelect;
         
         // Replace the select with a quickselect text_input
       	$(input).after(text_input).after(hidden_input).remove(); // add text input, hidden input, remove select.
-        console.log(my_options);
+        // console.log(my_options);
       	text_input.quickselect(my_options); // make the text input into a QuickSelect.
       }
     });
