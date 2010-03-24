@@ -12,7 +12,7 @@ h4. Installation
 # Include the jquery library in your project.
 # Then you'll need the following files for this plugin:
 #* "quicksilver.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/quicksilver.js
-#* OR "fuzzy-string.js":http://github.com/dcparker/jquery_plugins/raw/master/fuzzy-string/fuzzy-string.js
+#* OR "fuzzy-string.js":http://github.com/dcparker/jquery_plugins/raw/master/fuzzy-string/fuzzy-string.js (a quicksilver-like matcher on magical steroids)
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.js
 #* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.css
 
@@ -49,6 +49,7 @@ Two modes for data: Data, and Ajax.
 * exactMatch: use this if you absolutely need the typed value to end up matching one of the list items in the end. If something is typed but no match is found, the text field and all fields specified in additionalFields instantly get blank values.
 * autoFill: true/false - use this if you want the text input to automatically try to finish what you're typing as you type, based on the top match. This only works with the 'startsWith' match method.
 * maxVisibleItems: limit the number of items shown in the list at any one time.
+* onBlank: supply a callback function to be run when there are no results to a query. Do whatever you want to happen when no results are found. Return true to trigger setting all additionalFields to blank values, or false to skip blanking them.
 * extraOption: optional, add an extra option to always appear at the bottom of the results list.
 * formatItem: optional, assign a function that will transform the item list labels. The function is called for each item with three arguments (item, index, total_count), and is expected to return a string.
 * cssFlavor: choose one of the built-in flavors. Default is named 'quickselect'. This causes the next four css classes to be set based on this flavor name, unless you set them explicitly.
@@ -56,7 +57,7 @@ Two modes for data: Data, and Ajax.
 * loadingClass: css class for styling the text input while loading ajax. Default options.cssFlavor+'_loading'
 * resultsClass: css class for styling the drop-down items list. Default options.cssFlavor+'_results'
 * selectedClass: css class for styling the currently-selected item in the drop-down list. Default options.cssFlavor+'_selected'
-* width: sets the width of the drop-down list. (default: width of the input element)
+* width: sets the width of the drop-down list. (default: calculated width of the input element)
 
 h4. Credit
 
