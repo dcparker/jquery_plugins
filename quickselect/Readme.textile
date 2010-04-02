@@ -51,6 +51,7 @@ Two modes for data: Data, and Ajax.
 * maxVisibleItems: limit the number of items shown in the list at any one time.
 * onBlank: supply a callback function to be run when there are no results to a query. Do whatever you want to happen when no results are found. Return true to trigger setting all additionalFields to blank values, or false to skip blanking them.
 * extraOption: optional, add an extra option to always appear at the bottom of the results list.
+* noResultsDefault: optional, add an extra option that only shows up when there are no results, and its associated values will be set to the additionalFields, if any.
 * formatItem: optional, assign a function that will transform the item list labels. The function is called for each item with three arguments (item, index, total_count), and is expected to return a string.
 * cssFlavor: choose one of the built-in flavors. Default is named 'quickselect'. This causes the next four css classes to be set based on this flavor name, unless you set them explicitly.
 * inputClass: css class for styling the text input box. Default options.cssFlavor+'_input'
