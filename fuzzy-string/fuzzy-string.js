@@ -15,21 +15,22 @@ String.scoring_options = {
   // just adds on to the acronym boost
   firstChar : 0.5,
   // such as 'qbf' or 'QBF' when referring to 'The Quick Brown Fox'
-  acronym : 1,
+  acronym : 2.2,
   // match boost for matching capital letters, whether query was capital or not. Thus, 'ABC'.score('ABC') > 'abc'.score('abc')
-  capitalLetter : 0.2,
+  capitalLetter : 0.8,
   // when the query character matches case-sensitive
-  caseMatch : 0.2,
+  caseMatch : 0.3,
   // when two consecutive characters of the query match two consecutive characters of the string
-  consecutiveChars : 0.2,
+  consecutiveChars : 0.5,
+  nonConsecutiveChars : -0.2,
   // when a query character is missing from the string
-  missingMatch : -5.5,
+  missingMatch : -6,
   // when a query character matches in the string, but is not in order with the rest of the string
   outOfOrder : {
     // Subtracts this proportionally based on the ACTUAL point value of each character in the abbreviation,
     // and then reduces the other boosts by the multiplier value. That way we're SURE it's always positively
     // valuable to include a character even if it's out of place.
-    score: -1, // subtracts all of the base value of having the character in there - only bonuses count now.
+    score: -1.5, // subtracts all of the base value of having the character in there - only bonuses count now.
     multiplier: 0.1 // reduces the effect of the other boosts by a LOT - although if there are any boosts at all, the score will at least be positive
   }
 };
@@ -57,6 +58,13 @@ Array.prototype.each = function(cb){
     cb.apply(this[i], [i]);
   }
   return this;
+};
+Array.prototype.map = function(cb){
+  var i,len=this.length,a=[];
+  for(i=0;i<len;i++){
+    a.push(cb.apply(this[i]));
+  }
+  return a;
 };
 Array.prototype.highest = function(how){
   return this[this.highest_i(how)];
@@ -87,18 +95,25 @@ String.prototype.count_match = function(regexp){
   return count;
 };
 
-// object: MatchTree
-// purpose: Walks through a string and finds the matching characters in abbr.
-//          Every possible match path is found, and notes are taken on the characteristics of each find.
-//          These notes will be useful for scoring later on.
-// properties:
-//    parent - points to parent MatchTree object
-//    original - points to the original string we're matching
-// arguments:
-//    parent - [optional] passing in the parent MatchTree object
-//    string - the string to match against
-//    abbr   - the query to match against the string
-var MatchTree = function(parent, string, abbr, positions){
+var MatchTree = function(parent, orig_string, string, abbr, positions){
+  this.ancestry = function(){
+    return this.parent ? this.parent.ancestry().concat([this]) : [];
+  };
+
+  this.paths = function(){
+    var paths=[],abbr_so_far;
+    if(this.next_matches){
+      var i,mlen=this.next_matches.length;
+      for(i=0;i<mlen;i++){
+        paths = paths.concat(this.next_matches[i].paths());
+      }
+    }else{
+      paths.push(this.ancestry());
+    }
+    return paths;
+  };
+
+  // Constructor
   if(parent.constructor===String){
     this.parent = null;
     this.original = ''+parent;
@@ -106,8 +121,9 @@ var MatchTree = function(parent, string, abbr, positions){
     this.positions = [];
     this.position = 0;
 
-    abbr = string;
+    abbr = orig_string;
     string = parent;
+    orig_string = string;
   }else{
     this.parent = parent;
     this.original = parent.original; // pass the string down each level
@@ -116,12 +132,11 @@ var MatchTree = function(parent, string, abbr, positions){
 
     // In this case, the abbr that is sent matches on the first character. Here we analyze that match before matching further.
     var match_chr = string.first();
-    var abbr_chr = abbr.first();
-    // this.match = abbr_chr;
+    this.chr = abbr.first();
 
     // Add bonuses
-    this.match_info = [abbr_chr + this.position];
-    if(match_chr.toLowerCase()!==abbr_chr.toLowerCase()){
+    this.match_info = [this.chr + this.position];
+    if(match_chr.toLowerCase()!==this.chr.toLowerCase()){
       this.match_info.push('missingMatch');
       this.position=parent.position;
     }else{
@@ -129,14 +144,14 @@ var MatchTree = function(parent, string, abbr, positions){
       if(this.position===0)this.match_info.push('firstChar');
       if(this.position===0 || this.original.slice(this.position-1,this.position)==' ')this.match_info.push('acronym');
       if(match_chr.toUpperCase()===match_chr)this.match_info.push('capitalLetter');
-      if(abbr_chr===match_chr)this.match_info.push('caseMatch');
+      if(this.chr===match_chr)this.match_info.push('caseMatch');
       if(this.position!==0 && this.parent.position===this.position-1)this.match_info.push('consecutiveChars');
+        else this.match_info.push('nonConsecutiveChars');
     }
     
     // Shift over to the next abbreviation character
     string=''+this.original;
     abbr = abbr.slice(1);
-    // this.abbr = abbr;
   }
 
   // If there is any more abbr to match, then create children
@@ -148,34 +163,21 @@ var MatchTree = function(parent, string, abbr, positions){
       pp=this.original.length-string.length+pos;
       // Can't match the same character twice.
       if(!this.positions.includes(pp))
-        this.next_matches.push(new MatchTree(this, string.slice(pos), abbr, this.positions.concat([pp])));
+        this.next_matches.push(new MatchTree(this, orig_string, string.slice(pos), abbr, this.positions.concat([pp])));
       string=string.slice(pos+1);
       pos=string.toLowerCase().indexOf(chr.toLowerCase());
     }
     if(this.next_matches.length===0){
-      this.next_matches.push(new MatchTree(this, string, abbr, this.positions));
+      this.next_matches.push(new MatchTree(this, orig_string, string, abbr, this.positions));
     }
   }
-
-  this.ancestry = function(){
-    return this.parent ? this.parent.ancestry().concat([this]) : [];
-  };
-
-  this.paths = function(){
-    var paths=[];
-    if(this.next_matches){
-      var i,mlen=this.next_matches.length;
-      for(i=0;i<mlen;i++){
-        paths = paths.concat(this.next_matches[i].paths());
-      }
-    }else{
-      paths.push(this.ancestry());
-    }
-    return paths;
-  };
 };
 
+var CachedScores = {};
+
 String.prototype.score = function(abbr){
+  // Use cached version if we've already scored this string for this abbr!
+  if(CachedScores[this] && CachedScores[this][abbr]) return CachedScores[this][abbr];
   // Cheat: if exact match, go ahead and just immediately return the highest score possible
   if(this==abbr)return 1.0;
   
@@ -240,19 +242,26 @@ String.prototype.score = function(abbr){
     var path,plen=paths.length;
 
     // Then, calculate the score for each path
-    var i,j,match_infos,score,scores=[],multiplier;
+    var i,j,match_infos,score,scores=[],multiplier,_char;
     paths.each(function(){
       path = this;
       score = 0;
       path.match_infos=[];
       path.each(function(){
+        _char = this;
         score += 1;
         multiplier = 1;
         if(this.match_info.includes('outOfOrder'))
           multiplier = options.outOfOrder.multiplier;
         this.match_info.each(function(){
           if(options[this])
-            score += ( this=='outOfOrder' ? (options.outOfOrder.score * (score_per_character-1)) : (options[this] * multiplier) );
+            score += (
+              this=='outOfOrder' ? (options.outOfOrder.score * (score_per_character-1)) :
+              // This score gets worse depending on the proximity of the two characters' match locations
+              ( this=='nonConsecutiveChars' ? (((_char.position - _char.parent.position) / abbr.length) * (options.nonConsecutiveChars * 2)) :
+                (options[this] * multiplier)
+              )
+            );
         });
         path.match_infos.push(this.match_info, score);
       });
@@ -267,7 +276,14 @@ String.prototype.score = function(abbr){
     var best_path = paths[best_path_i];
 
     var highest = scores[best_path_i];
-    return(highest===0 ? 0 : highest/potential_score);
+    
+    var final_score = highest===0 ? 0 : highest/potential_score;
+
+    // Cache the resulting score!
+    if(!CachedScores[this]) CachedScores[this] = {};
+    CachedScores[this][abbr] = final_score;
+
+    return final_score;
 };
 
 Array.prototype.best_score_index = function(abbr){
