@@ -9,4 +9,4 @@ Keeps helper text in an input box as long as it's not focused and doesn't have s
 ## QuickSelect
 Type in an input box, and a list of matching options shows below. Use your arrow keys to select one of them and it will fill in the rest of the field for you. Lots of options, you can do just about whatever you want with this one.
 ## Range Selector
-Hard to describe in words... this UI widget allows you to select a range of items using the mouse. Good for things like the alphabet or numbers where you want to select a range. Simply calls a callback whenever a new range has been selected.
+This UI widget allows you to select a range of items using the mouse. Good for things like the alphabet or numbers where you want to select a range. Simply calls a callback whenever a new range has been selected.
