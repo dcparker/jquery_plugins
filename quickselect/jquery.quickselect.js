@@ -370,7 +370,7 @@ var QuickSelect;
         a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
         b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Get proximities
-        var a_proximity = a.indexOf(match_query);
+        var a_proximity = a ? a.indexOf(match_query) : ''; // The ternary check for a is a fix for an obscure IE7 bug, where a sometimes is not set
         var b_proximity = b.indexOf(match_query);
         // Compare a & b by match proximity to beginning of label, secondly alphabetically
         return(a_proximity > b_proximity ? -1 : (a_proximity < b_proximity ? 1 : (a > b ? -1 : (b > a ? 1 : 0))));
