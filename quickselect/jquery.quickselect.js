@@ -46,6 +46,7 @@ var QuickSelect;
       }
       $('body').append($results_list);
       $results_list.hide(); // in case for some reason it didn't hide before appending it?
+      $results_mask.hide();
       if(ie_stupidity) $('body').append($results_mask);
 
     // Set up all of the methods
