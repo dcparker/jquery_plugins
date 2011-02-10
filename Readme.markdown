@@ -1,9 +1,14 @@
 ## EditInPlace
 Allows you to simply turn an element into a text box that disappears and calls a callback with the value after the user hits Tab or Enter.
 ## FuzzyString
-QuickSilver-like string matching, but on super steroids! So good that I can just think of an option and let my fingers hit the keyboard, and it STILL matches what I was thinking of as the best match.
+Archived due to performance issues. QuickSilver-like string matching. For 
+production use try [String Score](https://github.com/joshaven/string_score/blob/master/string_score.min.js).
+FuzzyString is very nice except for the performance issue.  If anyone is interested in String scoreing 
+this would be a great project to fix up.  The problem with FuzzyString is matching against longer strings. 
+See [issue](https://github.com/dcparker/jquery_plugins/issues#issue/12).
 
-Here's how it works: [http://bit.ly/1xBafm](http://bit.ly/1xBafm)
+Here's how FuzzyString works: [http://bit.ly/1xBafm](http://bit.ly/1xBafm)
+
 ## Input Placeholder
 Keeps helper text in an input box as long as it's not focused and doesn't have some other value in it.
 ## QuickSelect
