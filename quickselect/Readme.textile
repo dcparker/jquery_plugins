@@ -12,7 +12,7 @@ h4. Installation
 # Include the jquery library in your project.
 # Then you'll need the following files for this plugin:
 #* "quicksilver.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/quicksilver.js
-#* OR "fuzzy-string.js":http://github.com/dcparker/jquery_plugins/raw/master/fuzzy-string/fuzzy-string.js (a quicksilver-like matcher on magical steroids)
+#* OR "string_score.min.js":https://github.com/joshaven/string_score/raw/master/string_score.min.js (a quicksilver-like matcher on magical steroids)
 #* "jquery.quickselect.js":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.js
 #* "jquery.quickselect.css":http://github.com/dcparker/jquery_plugins/raw/master/quickselect/jquery.quickselect.css
 
