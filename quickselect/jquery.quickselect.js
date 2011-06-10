@@ -108,7 +108,7 @@ var QuickSelect;
         $input_element.val(label); // Set the visible value
         previous_value = label;
         $results_list.empty(); // clear the results list
-        $(options.additionalFields).each(function(i,input){$(input).val(values[i+1]);}); // set the additional fields' values
+        $(options.additionalFields).each(function(i,input){$(input).val(values[i+1]).change();}); // set the additional fields' values and trigger change event
         if(!from_hide_now_function)hideResultsNow(); // hide the results when something is selected
         if(options.onItemSelect)setTimeout(function(){ options.onItemSelect(li); }, 1); // run the user callback, if set
         return true;
