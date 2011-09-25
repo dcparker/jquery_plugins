@@ -322,13 +322,13 @@ var QuickSelect;
       // Sort by match relevance
       return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
-        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
+        var a1 = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        var b1 = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Score a & b
-        a = a.score(match_query);
-        b = b.score(match_query);
+        a1 = a1.score(match_query);
+        b1 = b1.score(match_query);
         // Compare a & b by score
-        return(a > b ? -1 : (b > a ? 1 : 0));
+        return(a1 > b1 ? -1 : (b1 > a1 ? 1 : 0));
       });
     },
     quicksilver_with_first_match : function(q,data){
@@ -348,13 +348,13 @@ var QuickSelect;
       // Sort by match relevance
       return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
-        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
+        var a1 = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        var b1 = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Score a & b
-        a = a.score(match_query);
-        b = b.score(match_query);
+        a1 = a1.score(match_query);
+        b1 = b1.score(match_query);
         // Compare a & b
-        return(a > b ? -1 : (b > a ? 1 : 0));
+        return(a1 > b1 ? -1 : (b1 > a1 ? 1 : 0));
       });
     },
     contains : function(q,data){
@@ -367,14 +367,14 @@ var QuickSelect;
       }
       return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
-        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
+        var a1 = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        var b1 = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Get proximities
-        var a_proximity = a.indexOf(match_query);
-        var a_proximity = a ? a.indexOf(match_query) : ''; // The ternary check for a is a fix for an obscure IE7 bug, where a sometimes is not set (gudmundurh)
-        var b_proximity = b.indexOf(match_query);
+        var a_proximity = a1.indexOf(match_query);
+        var a_proximity = a1 ? a1.indexOf(match_query) : ''; // The ternary check for a is a fix for an obscure IE7 bug, where a sometimes is not set (gudmundurh)
+        var b_proximity = b1.indexOf(match_query);
         // Compare a & b by match proximity to beginning of label, secondly alphabetically
-        return(a_proximity > b_proximity ? -1 : (a_proximity < b_proximity ? 1 : (a > b ? -1 : (b > a ? 1 : 0))));
+        return(a_proximity > b_proximity ? -1 : (a_proximity < b_proximity ? 1 : (a1 > b1 ? -1 : (b1 > a1 ? 1 : 0))));
       });
     },
     startsWith : function(q,data){
@@ -387,10 +387,10 @@ var QuickSelect;
       }
       return self.AllItems[match_query].sort(function(a,b){
         // Normalize a & b
-        a = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
-        b = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
+        var a1 = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
+        var b1 = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
         // Compare a & b alphabetically
-        return(a > b ? -1 : (b > a ? 1 : 0));
+        return(a1 > b1 ? -1 : (b1 > a1 ? 1 : 0));
       });
     }
   };
