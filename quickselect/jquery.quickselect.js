@@ -369,6 +369,13 @@ var QuickSelect;
         // Normalize a & b
         var a1 = (self.options.matchCase ? self.getLabel(a) : self.getLabel(a).toLowerCase());
         var b1 = (self.options.matchCase ? self.getLabel(b) : self.getLabel(b).toLowerCase());
+        
+        // Sort ascending by alphabet
+        if (self.options.sortAlphabetically)
+		{
+			return a1 > b1;
+		}
+		
         // Get proximities
         var a_proximity = a1.indexOf(match_query);
         var a_proximity = a1 ? a1.indexOf(match_query) : ''; // The ternary check for a is a fix for an obscure IE7 bug, where a sometimes is not set (gudmundurh)
@@ -436,6 +443,7 @@ var QuickSelect;
     options.loadingClass  = options.loadingClass || options.cssFlavor+"_loading";
     options.resultsClass  = options.resultsClass || options.cssFlavor+"_results";
     options.selectedClass = options.selectedClass || options.cssFlavor+"_selected";
+    options.sortAlphabetically = options.sortAlphabetically || false;
 // wrap entire thing: .ui-widget
 // default item:      .ui-state-default
 // active / hover:    .ui-state-hover
